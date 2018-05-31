@@ -13,6 +13,7 @@
 #include <sstream>
 #include <iomanip>
 #define MAXNV 500
+#define MAXTK 100
 
 using namespace std;
 							// BAT DAU KHAI BAO
@@ -25,45 +26,35 @@ struct CT_HOADON{
 	char MaVT[11];
 	int soluong;
 	int dongia;
-	int VAT;
+	double VAT;
 };
 struct NODECT_HOADON{
 	CT_HOADON Data;
 	NODECT_HOADON *pNext;
 };
-struct DSCT_HOADON{
-	NODECT_HOADON * pHead;
-	NODECT_HOADON* pTail;
-};
-typedef struct DSCT_HOADON DSCT;
-
 struct HOADON{
 	char SoHD[21];
 	Date date;
-	char loai[1];
-	char MaNV[11];
-	DSCT l;
+	char loai;
+	NODECT_HOADON* fisrtCT;
 };
 struct NODE_HOADON{
 	HOADON data;
 	NODE_HOADON *pNext;
 };
-struct DS_HOADON{
-	NODE_HOADON* pHead;
-	NODE_HOADON* pTail;
-};
+
 typedef struct DS_HOADON DSHD;
 struct NHANVIEN{
-	string MaNV;
-	string Ho;
-	string Ten;
-	string Phai;
-	DSHD l;
+	char MaNV[11];
+	char Ho[21];
+	char Ten[21];
+	char Phai[3];
+	NODE_HOADON* fisrtHD;
 };
 struct DSNV
 {
 	NHANVIEN *nv= new NHANVIEN[MAXNV];
-	int soLuongNV;
+	int soLuongNV=0;
 };
 DSNV dsnv;
 struct VATTU{
@@ -78,20 +69,21 @@ struct NODE_VATTU{
 	NODE_VATTU *pRight;
 };
 typedef NODE_VATTU* Tree;
+Tree t;
 struct THONGKE
 {
 	char SoHD[21];
 	Date date;
-	char Loai[2];
+	char Loai;
 	string HoTenNV;
-	long donGia;
+	int donGia;
 };
 struct DS_THONGKE
 {
-	THONGKE *tk = new THONGKE[100];
+	THONGKE *tk = new THONGKE[MAXTK];
 	int soTK;
 };
-DS_THONGKE ds;
+DS_THONGKE dstk;
 							// KET THUC KHAI BAO
                             // BAT DAU HAM GIAO DIEN
 void resizeConsole(int width, int height)
@@ -105,218 +97,102 @@ void resizeConsole(int width, int height)
 int setMauChon = 32;
 int yMap = 3; // vi tri cho cac thanh phan trong bang thong ke va bang chi tiet
 int xMap = 20;
-int yMapTh = 40; // 34 vi tri bang them hoac sua
-int xMapTh = 3; //3 vi vi tri bang them hoac sua
-//int xMapCN = 46;
-//int yMapCN = 6;
-int xMapTimKiem=68;
-int yMapTimKiem=8;
-// Ham ve giao dien chia vung
-int arrGiaoDienChinh[4] ={1,40,100,145};
-void veKhungGiaoDienChinh()
+void xoakhungtongtien(int y)
 {
-	int y = 2;
-	
-	gotoxy(arrGiaoDienChinh[0]+17,y+1);
+	gotoxy(17,y);
+	cout <<"                                                                                      ";
+	gotoxy(17,y+1);
+	cout <<"                                                                                      ";
+	gotoxy(17,y+2);
+	cout <<"                                                                                      ";
+}
+void veKhungTongGiaTien(int y)
+{
 	textcolor(10);
-	cout << "MENU";
-	gotoxy(arrGiaoDienChinh[3]-30,y+1);
-	cout << "QUAN LY VAT TU";
-	textcolor(7);
-	textcolor(11);
-	for(int j =y; j <= y+50;j++)
+	gotoxy(18, y+1);
+	cout << char(179);
+	gotoxy(18,y);
+	for(int i = 0; i < 67; i++)
 	{
-		gotoxy(arrGiaoDienChinh[0],j);
-		cout << (char)186;
-		gotoxy(arrGiaoDienChinh[1],j);
-		cout << char(186);
-		gotoxy(arrGiaoDienChinh[3],j);
-		cout << char(186);
-		if(j < y +3)
-		{
-			gotoxy(arrGiaoDienChinh[2],j);
-			cout << char(186);
-		}
+		cout << char(196);
 	}
-	for(int i = arrGiaoDienChinh[0];i<=arrGiaoDienChinh[3];i++)
+	cout << char(191);
+	gotoxy(43, y+1);
+	cout << char(179);
+	gotoxy(43, y);
+	cout << char(194);
+	gotoxy(18, y+2);
+	cout << char(192);
+	for(int i = 0; i < 66; i++)
 	{
-		gotoxy(i,y);
-		if(i == arrGiaoDienChinh[1] || i == arrGiaoDienChinh[2])
-		{
-			cout <<  (char)203;
-		}
-		else if (i == arrGiaoDienChinh[3])
-		{
-			cout << (char)187;
-		}
-		else if(i== arrGiaoDienChinh[0])
-		{
-			cout << (char)201;
-		}
-		else cout << (char)205;
-		
-		gotoxy(i,y+3);
-		if(i ==arrGiaoDienChinh[1])
-			cout << (char)206;
-		else if(i == arrGiaoDienChinh[0])
-			cout << (char)204;
-		else if(i == arrGiaoDienChinh[2])
-		cout << (char)202;
-		else if(i == arrGiaoDienChinh[3])
-			cout << (char)185;
-		else 
-			cout << (char)205;
-		if(i <arrGiaoDienChinh[1])
-		{
-			gotoxy(i,y+30);
-			if(i == arrGiaoDienChinh[0])
-				cout << (char)204;
-			else if(i == arrGiaoDienChinh[1])
-				cout << (char)185;
-				
-			else cout << (char)205;
-		}
-			
-		
-		gotoxy(i, y + 50);
-		if(i==arrGiaoDienChinh[1])
-			cout << (char)202;
-		else if(i == arrGiaoDienChinh[0])
-			cout << (char)200;
-		else if(i == arrGiaoDienChinh[3])
-			cout << (char)188;
-		else 
-			cout << (char)205;
+		cout << char(196);
 	}
+	gotoxy(43, y+2);
+	cout << char(193);
+	gotoxy(85, y+1);
+	cout << char(179);
+	gotoxy(85, y+2);
+	cout << char(217);
+	gotoxy(18, y);
+	cout << char(218);
+	gotoxy(20,y+1);
+	cout << "Tong Gia Tien: ";
 	textcolor(7);
 }
-// ham ve bang xoa
-void veOTimKiem(string name)
+void VeNVVT(int x, int y)
 {
-	for (int i = xMapTimKiem; i < xMapTimKiem + 50; i++)
+	gotoxy(18, y-1);
+	cout << char(195);
+	gotoxy(18, y);
+	cout << char(179);
+	for(int i = 0; i < 3; i++)
 	{
-		for (int j = 0; j <= 2; j += 2)
-		{
-			gotoxy(i, yMapTimKiem + j);
-			cout << char(205);
-		}
+		gotoxy(x + 15 + i*22, y);
+		cout << char(179);
 	}
-	for (int k = yMapTimKiem; k <= yMapTimKiem + 2; k++)
+	gotoxy(85, y);
+	cout << char(179);
+	gotoxy(x, y + 1);
+	cout << char(195);
+	for(int i = 0; i < 66; i++)
+		cout << char(196);
+	cout << char(180);
+	gotoxy(85,y-1);
+	cout << char(180);
+	for(int i = 0; i < 3; i++)
 	{
-		gotoxy(xMapTimKiem, k);
-		if (k == yMapTimKiem)
-		{
-			cout << char(201);
-		}
-		else if (k == yMapTimKiem + 2)
-		{
-			cout << char(200);
-		}
-		else if (k % 2 == 0)
-		{
-			cout << char(204);
-		}
-		else
-		{
-			cout << char(186);
-		}
-
-		gotoxy(xMapTimKiem + 50, k);
-		if (k == yMapTimKiem)
-		{
-			cout << char(187);
-		}
-		else if (k == yMapTimKiem + 2)
-		{
-			cout << char(188);
-		}
-		else if (k % 2 == 0)
-		{
-			cout << char(185);
-		}
-		else
-		{
-			cout << char(186);
-		}
-
-		gotoxy(xMapTimKiem + 20, k);
-		if (k == yMapTimKiem)
-		{
-			cout << char(203);
-		}
-		else if (k == yMapTimKiem + 2)
-		{
-			cout << char(202);
-		}
-		else if (k % 2 == 0)
-		{
-			cout << char(206);
-		}
-		else
-		{
-			cout << char(186);
-		}
-
+		gotoxy(x + 15 + i*22, y + 1);
+		cout << char(197);
 	}
-	gotoxy(xMapTimKiem + 2, yMapTimKiem + 1);
-	textcolor(10);
-	cout << name;
-	textcolor(7);
-
+	for(int i = 0; i < 3; i++)
+	{
+		gotoxy(x + 15 + i*22, y-1);
+		cout << char(197);
+	}
 }
-// ham ve bang them hoac sua
-void vebangThemMoi(string *arrTen,int n)
+void VeNVVT2(int x, int y)
 {
-	for(int i = xMapTh; i < xMapTh + 35;i++)
+	for(int i = 0; i < 3; i++)
 	{
-		for(int j =0;j <= n*2; j+=2)
-		{
-			gotoxy(i,yMapTh + j);
-			cout << (char)205;
-		}
+		gotoxy(x + 15 + i*22, y);
+		cout << char(179);
 	}
-	for(int k = yMapTh;k <= yMapTh + n*2; k++)
+	gotoxy(85, y);
+	cout << char(179);
+	gotoxy(18, y);
+	cout << char(179);
+	gotoxy(x, y + 1);
+	cout << char(192);
+	for(int i = 0; i < 66; i++)
+		cout << char(196);
+	cout << char(217);
+	for(int i = 0; i < 3; i++)
 	{
-		gotoxy(xMapTh,k);
-		if(k == yMapTh)
-			cout << (char)201;
-		else if(k== yMapTh +n*2)
-			cout << (char)200;
-		else if(k %2==0)
-			cout << (char)204;
-		else
-			cout << (char)186;
-		
-		gotoxy(xMapTh + 34,k);
-		if(k==yMapTh)
-			cout << (char)187;
-		else if(k== yMapTh + n*2)
-			cout << (char)188;
-		else if(k%2 ==0 )
-			cout << (char)185;
-		else 
-			cout << (char)186;
-			
-		gotoxy(xMapTh+10,k);
-		if(k == yMapTh)
-			cout << (char)203;
-		else if(k == yMapTh +n*2)
-			cout << (char)202;
-		else if(k%2 == 0)
-			cout << (char)206;
-		else
-			cout << (char)186;
-	}
-	for(int i=0; i <=n;i++)
-	{
-		gotoxy(xMapTh+1,i*2+yMapTh+1);
-		textcolor(10);
-		cout << arrTen[i];
-		textcolor(7);
-
+		gotoxy(x + 15 + i*22, y + 1);
+		cout << char(193);
 	}
 }
-// ham ve button 
+
 void hcn(int x, int y,string name, bool choose = false)
 {
 	if(choose)
@@ -388,323 +264,437 @@ void hcn(int x, int y,string name, bool choose = false)
 }
 // ham in button menu
 int arrMenuVT[8] ={7,11,15,19,23,27,31};
+int yMapMN = 40;
 void vemenu(int *arr, string *arrTuKhoa, int n) //n: so chuc nang can show ra man hinh
 {
 
 	for (int i = 0; i < n; i++)
 	{
-		hcn(5, arr[i], arrTuKhoa[i]);
+		hcn(yMapMN, arr[i], arrTuKhoa[i]);
 	}
 }
-int arrToaDoBangThongKeHD[6] ={ 45,63,83,90,120,140};
+int ytk = -4;
+int arrToaDoBangThongKeHD[6] ={ 2,24,44,54,81,105};
 void veBangThongKeHD()
 {
 	string arrTuKhoa[] = { "So HD","Ngay Lap","Loai","Ho ten NV Lap","Don Gia" };
 	for (int i = 0; i < 5; i++)
 	{
-		gotoxy(arrToaDoBangThongKeHD[i] + 1 + ((arrToaDoBangThongKeHD[i + 1] - arrToaDoBangThongKeHD[i] - arrTuKhoa[i].length()) / 2), yMap + 11);
+		gotoxy(arrToaDoBangThongKeHD[i] + 1 + ((arrToaDoBangThongKeHD[i + 1] - arrToaDoBangThongKeHD[i] - arrTuKhoa[i].length()) / 2), ytk + 11);
 		textcolor(10);
 		cout << arrTuKhoa[i];
 		textcolor(7);
 
 	}
-	for (int j = yMap + 10; j <= yMap + 40; j++)
+	for (int j = ytk + 10; j <= ytk + 40; j++)
 	{
 		gotoxy(arrToaDoBangThongKeHD[0], j);
-		cout << char(186);
+		cout << char(179);
 		gotoxy(arrToaDoBangThongKeHD[5], j);
-		cout << char(186);
+		cout << char(179);
 		gotoxy(arrToaDoBangThongKeHD[1], j);
-		cout << char(186);
+		cout << char(179);
 		gotoxy(arrToaDoBangThongKeHD[2], j);
-		cout << char(186);
+		cout << char(179);
 		gotoxy(arrToaDoBangThongKeHD[3], j);
-		cout << char(186);
+		cout << char(179);
 		gotoxy(arrToaDoBangThongKeHD[4], j);
-		cout << char(186);
+		cout << char(179);
 	}
 	for (int i = arrToaDoBangThongKeHD[0]; i <= arrToaDoBangThongKeHD[5]; i++)
 	{
-		gotoxy(i, yMap + 10);
+		gotoxy(i, ytk + 10);
 		if (i == arrToaDoBangThongKeHD[1] || i == arrToaDoBangThongKeHD[2] || i == arrToaDoBangThongKeHD[3] || i == arrToaDoBangThongKeHD[4])
-			cout << char(203);
+			cout << char(194);
 		else if (i == arrToaDoBangThongKeHD[0])
 		{
-			cout << char(201);
+			cout << char(218);
 		}
 		else if (i == arrToaDoBangThongKeHD[5])
 		{
-			cout << char(187);
+			cout << char(191);
 		}
 
 		else
 		{
-			cout << char(205);
+			cout << char(196);
 		}
-		gotoxy(i, yMap + 12);
+		gotoxy(i, ytk + 12);
 		if (i == arrToaDoBangThongKeHD[1] || i == arrToaDoBangThongKeHD[2] || i == arrToaDoBangThongKeHD[3] || i == arrToaDoBangThongKeHD[4])
-			cout << char(206);
+			cout << char(197);
 		else if (i == arrToaDoBangThongKeHD[0])
 		{
-			cout << char(204);
+			cout << char(195);
 		}
 		else if (i == arrToaDoBangThongKeHD[5])
 		{
-			cout << char(185);
+			cout << char(180);
 		}
 		else
 		{
-			cout << char(205);
+			cout << char(196);
 		}
-		gotoxy(i, yMap + 40);
+		gotoxy(i, ytk + 40);
 		if (i == arrToaDoBangThongKeHD[1] || i == arrToaDoBangThongKeHD[2] || i == arrToaDoBangThongKeHD[3] || i == arrToaDoBangThongKeHD[4])
-			cout << char(202);
+			cout << char(193);
 		else if (i == arrToaDoBangThongKeHD[0])
-			cout << char(200);
+			cout << char(192);
 		else if (i == arrToaDoBangThongKeHD[5])
 		{
-			cout << char(188);
+			cout << char(217);
 		}
 		else
 		{
-			cout << char(205);
+			cout << char(196);
 		}
 	}
 }
-int arrDSHD[]={56,64,90,116,129,142};
-void veBangDSHD()
+void SuaYesNo(int x, int y, int ht)
 {
-	string arrTuKhoa[] = { "STT","So HD","Ngay Lap","Loai"};
-	for (int i = 0; i < 4; i++)
+	if(ht == 0)
 	{
-		gotoxy(arrDSHD[i] + 1 + ((arrDSHD[i + 1] - arrDSHD[i] - arrTuKhoa[i].length()) / 2), yMap + 11);
-		textcolor(10);
-		cout << arrTuKhoa[i];
-		textcolor(7);
-
+		textcolor(42);
+		gotoxy(x, y);
+		cout << "Yes";
+		textcolor(11);
+		gotoxy(x + 20, y);
+		cout << "No";
 	}
-	for (int j = yMap + 10; j <= yMap + 45; j++)
+	else
 	{
-		gotoxy(arrDSHD[0], j);
-		cout << char(186);
-		gotoxy(arrDSHD[1], j);
-		cout << char(186);
-		gotoxy(arrDSHD[2], j);
-		cout << char(186);
-		gotoxy(arrDSHD[3], j);
-		cout << char(186);
-		gotoxy(arrDSHD[4], j);
-		cout << char(186);
-	}
-	for (int i = arrDSHD[0]; i <= arrDSHD[4]; i++)
-	{
-		gotoxy(i, yMap + 10);
-		if (i == arrDSHD[1] || i == arrDSHD[2] || i == arrDSHD[3])
-			cout << char(203);
-		else if (i == arrDSHD[0])
-		{
-			cout << char(201);
-		}
-		else if (i == arrDSHD[4])
-		{
-			cout << char(187);
-		}
-
-		else
-		{
-			cout << char(205);
-		}
-		gotoxy(i, yMap + 12);
-		if (i == arrDSHD[1] || i == arrDSHD[2] || i == arrDSHD[3])
-			cout << char(206);
-		else if (i == arrDSHD[0])
-		{
-			cout << char(204);
-		}
-		else if (i == arrDSHD[4])
-		{
-			cout << char(185);
-		}
-		else
-		{
-			cout << char(205);
-		}
-		gotoxy(i, yMap + 45);
-		if (i == arrDSHD[1] || i == arrDSHD[2] || i == arrDSHD[3])
-			cout << char(202);
-		else if (i == arrDSHD[0])
-			cout << char(200);
-		else if (i == arrDSHD[4])
-		{
-			cout << char(188);
-		}
-		else
-		{
-			cout << char(205);
-		}
+		textcolor(11);
+		gotoxy(x, y);
+		cout << "Yes";
+		textcolor(42);
+		gotoxy(x + 20, y);
+		cout << "No";
 	}
 }
-int arrToaDoBangNhapCTHD[8] ={ 44,50,68,90,100,110,130,140};
-void veBangNhapCT_HD()
+int YesNo(int x, int y)
 {
-	string arrTuKhoa[] = { "STT","Ma VT","Ten VT","DVT","So luong","Don gia","VAT" };
-	for (int i = 0; i < 7; i++)
+	Nocursortype();
+	textcolor(42);
+	gotoxy(x, y);
+	cout << "Yes";
+	textcolor(11);
+	gotoxy(x + 20, y);
+	cout << "No";
+	int i = 0;
+	int c;
+	while(int(c) != 13)
 	{
-		gotoxy(arrToaDoBangNhapCTHD[i] + 1 + ((arrToaDoBangNhapCTHD[i + 1] - arrToaDoBangNhapCTHD[i] - arrTuKhoa[i].length()) / 2), yMap + 11);
-		textcolor(10);
-		cout << arrTuKhoa[i];
-		textcolor(7);
-	}
-	for (int j = yMap + 10; j <= yMap + 40; j++)
-	{
-		gotoxy(arrToaDoBangNhapCTHD[0], j);
-		cout << char(186);
-		gotoxy(arrToaDoBangNhapCTHD[6], j);
-		cout << char(186);
-		gotoxy(arrToaDoBangNhapCTHD[7], j);
-		cout << char(186);
-		gotoxy(arrToaDoBangNhapCTHD[5], j);
-		cout << char(186);
-		gotoxy(arrToaDoBangNhapCTHD[1], j);
-		cout << char(186);
-		gotoxy(arrToaDoBangNhapCTHD[2], j);
-		cout << char(186);
-		gotoxy(arrToaDoBangNhapCTHD[3], j);
-		cout << char(186);
-		gotoxy(arrToaDoBangNhapCTHD[4], j);
-		cout << char(186);
-	}
-	for (int i = arrToaDoBangNhapCTHD[0]; i <= arrToaDoBangNhapCTHD[7]; i++)
-	{
-		gotoxy(i, yMap + 10);
-		if (i == arrToaDoBangNhapCTHD[1] || i == arrToaDoBangNhapCTHD[2] || i == arrToaDoBangNhapCTHD[3] || i == arrToaDoBangNhapCTHD[4] || i == arrToaDoBangNhapCTHD[5]|| i == arrToaDoBangNhapCTHD[6])
-			cout << char(203);
-		else if (i == arrToaDoBangNhapCTHD[0])
+		c = getch();
+		if(c == 224)
 		{
-			cout << char(201);
-		}
-		else if (i == arrToaDoBangNhapCTHD[7])
-		{
-			cout << char(187);
-		}
-
-		else
-		{
-			cout << char(205);
-		}
-		gotoxy(i, yMap + 12);
-		if (i == arrToaDoBangNhapCTHD[1] || i == arrToaDoBangNhapCTHD[2] || i == arrToaDoBangNhapCTHD[3] || i == arrToaDoBangNhapCTHD[4] || i == arrToaDoBangNhapCTHD[5]|| i == arrToaDoBangNhapCTHD[6])
-			cout << char(206);
-		else if (i == arrToaDoBangNhapCTHD[0])
-		{
-			cout << char(204);
-		}
-		else if (i == arrToaDoBangNhapCTHD[7])
-		{
-			cout << char(185);
-		}
-		else
-		{
-			cout << char(205);
-		}
-		gotoxy(i, yMap + 40);
-		if (i == arrToaDoBangNhapCTHD[1] || i == arrToaDoBangNhapCTHD[2] || i == arrToaDoBangNhapCTHD[3] || i == arrToaDoBangNhapCTHD[4] || i == arrToaDoBangNhapCTHD[5]|| i == arrToaDoBangNhapCTHD[6])
-			cout << char(202);
-		else if (i == arrToaDoBangNhapCTHD[0])
-			cout << char(200);
-		else if (i == arrToaDoBangNhapCTHD[7])
-		{
-			cout << char(188);
-		}
-		else
-		{
-			cout << char(205);
+			c = getch();
+			if(c == 75)
+			{
+				if(i == 0)
+					i = 1;
+				else i--;
+				SuaYesNo(44, 14, i);
+			}else
+			if(c == 77)
+			{
+				if(i == 0)
+					i = 1;
+				else i--;
+				SuaYesNo(44, 14, i);
+			}
 		}
 	}
-}
-// ham ve o hien thi ngay
-void vegiaodienngay(int x, int y)
-{
-	for (int i = 0; i < 25; i++)
-	{
-		gotoxy(x + i, y);
-		if (i == 0)
-		{
-			cout << (char)201;
-		}
-		else if (i == 24)
-		{
-			cout << (char)187;
-		}
-		else
-		{
-			cout << (char)205;
-		}
-		gotoxy(x + i, y + 2);
-		if (i == 0)
-		{
-			cout << (char)200;
-		}
-		else if (i == 24)
-		{
-			cout << (char)188;
-		}
-		else
-		{
-			cout << (char)205;
-		}
-	}
-	textcolor(10);
-	string name="Ngay:    /    /";	
 	textcolor(7);
-	gotoxy(x, y + 1);
-	cout << (char)186;
-	gotoxy(x + 24, y + 1);
-	cout << (char)186;
-	gotoxy(x+2, y + 1);
-	cout << name;
+	return (!i);
 }
-void KhungThongBaoXN(string str) //xac nhan
+int veKhungYesNo(string str, int tt)
+{
+	textcolor(14);
+	gotoxy(38, 9);
+	cout << char(218);
+	for(int i = 0; i < 33; i++)
+		cout << char(196);
+//--------------------		
+	gotoxy(39, 10);
+	for(int i = 0; i < 32; i++)
+		cout << " ";
+	gotoxy(39, 11);
+	for(int i = 0; i < 32; i++)
+		cout << " ";
+	gotoxy(39, 12);
+	for(int i = 0; i < 32; i++)
+		cout << " ";
+	gotoxy(39, 13);
+	for(int i = 0; i < 32; i++)
+		cout << " ";
+	gotoxy(39, 14);
+	for(int i = 0; i < 32; i++)
+		cout << " ";
+
+	for(int i = 0; i < 5; i++)
+	{
+		gotoxy(38, 10 + i);
+		cout << char(179);
+		gotoxy(71, 10 + i);
+		cout << char(179);
+	}
+	gotoxy(38, 15);
+	cout << char(192);
+	for(int i = 0; i < 32; i++)
+		cout << char(196);
+	cout << char(217);
+	gotoxy(38, 9);
+	cout << char(218);
+	gotoxy(71, 9);
+	cout << char(191);
+	textcolor(7);
+	gotoxy(39, 10);
+	cout << str;
+	if(tt)
+	{
+		gotoxy(51, 11);
+		cout << "Tiep tuc?";
+	}
+	return YesNo(44, 14);
+}
+void xoaKhungYN()
 {
 	for(int i = 0; i < 7; i++)
 	{
-		gotoxy(34, 7+i);
+		gotoxy(38, 9+i);
+		cout << "                                  ";
+	}
+}
+void XoaKhungTB()
+{
+	for(int i = 0; i < 7; i++)
+	{
+		gotoxy(39, 10+i);
+		cout << "                                  ";
+	}
+}
+void veKhungTB(string str)
+{
+	textcolor(14);
+	for(int i = 0; i < 7; i++)
+	{
+		gotoxy(39, 10+i);
 		cout << "                                 ";
 	}
-	gotoxy(34, 7);
+	gotoxy(39, 10);
 	cout << char(218);
 	for(int i = 0; i < 32; i++)
 		cout << char(196);
 	cout << char(191);
 	for(int i = 0; i < 5; i++)
 	{
-		gotoxy(34, 8 + i);
+		gotoxy(39, 11 + i);
 		cout << char(179);
-		gotoxy(67, 8 + i);
+		gotoxy(72, 11 + i);
 		cout << char(179);
 	}
-	gotoxy(34, 13);
+	gotoxy(39, 16);
 	cout << char(192);
 	for(int i = 0; i < 32; i++)
 		cout << char(196);
 	cout << char(217);
-	
-	gotoxy(35, 9);
+	textcolor(7);
+	gotoxy(40, 12);
 	cout << str;
-	gotoxy(50, 11);
+	gotoxy(55, 15);
 	textcolor(42);
 	cout << "OK";
-	textcolor(10);
+	textcolor(7);
 	getch();
 }
+void Ve1(int x, int y)
+{
+	gotoxy(10, y-1);
+	cout << char(195);
+	gotoxy(10, y);
+	cout << char(179);
+	for(int i = 0; i < 4; i++)
+	{
+		if(i==0)
+		{
+			gotoxy(25, y);
+			cout << char(179);
+			gotoxy(x + 15 + i*22, y + 1);
+			cout << char(197);
+		}
+		else
+		{
+			gotoxy(x + 10 + i*22, y);
+			cout << char(179);
+		}
+		
+	}
+	gotoxy(95, y);
+	cout << char(179);
+	gotoxy(x, y + 1);
+	cout << char(195);
+	for(int i = 0; i < 84; i++)
+		cout << char(196);
+	cout << char(180);
+	gotoxy(95,y-1);
+	cout << char(180);
+	for(int i = 0; i < 4; i++)
+	{
+		if(i==0)
+		{
+			gotoxy(x + 15 + i*22, y + 1);
+			cout << char(197);
+		}
+		else
+		{
+			gotoxy(x + 10 + i*22, y + 1);
+			cout << char(197);
+			gotoxy(x + 10 + i*22, y -1);
+			cout << char(197);
+		}
+		
+	}
+}
+void Ve2(int x, int y)
+{
+	for(int i = 0; i < 4; i++)
+	{
+		if(i==0)
+		{
+			gotoxy(x +15 + i*22, y);
+			cout << char(179);
+		}
+		else
+		{
+			
+			gotoxy(x + 10 + i*22, y);
+			cout << char(179);
+		}
+		
+	}
+	gotoxy(95, y);
+	cout << char(179);
+	gotoxy(10, y);
+	cout << char(179);
+	gotoxy(x, y + 1);
+	cout << char(192);
+	for(int i = 0; i < 84; i++)
+		cout << char(196);
+	cout << char(217);
+	for(int i = 0; i < 4; i++)
+	{
+		if(i==0)
+		{
+			gotoxy(x + 15 + i*22, y + 1);
+			cout << char(193);
+		}
+		else
+		{
+			gotoxy(x + 10 + i*22, y + 1);
+			cout << char(193);
+		}
+		
+	}
+}
+void veHTSearch(string name1,string name2,string name3,string name4)
+{
+	gotoxy(18, 5);
+	cout << char(179);
+	gotoxy(18, 4);
+	cout << char(218);
+	
+	for(int i = 0; i < 66; i++)
+		cout << char(196);
+	cout << char(191);
+	gotoxy(33, 5);
+	cout << char(179);
+	gotoxy(33, 4);
+	cout << char(194);
+	gotoxy(18, 6);
+	cout << char(195);
+	
+	for(int i = 0; i < 66; i++)
+		cout << char(196);
+		for(int i = 1; i < 3; i++)
+		{
+			gotoxy(33 + i*22, 4);
+			cout << char(194);
+			gotoxy(33 + i*22, 5);
+			cout << char(179);
+			gotoxy(33 + i*22, 6);
+			cout << char(197);
+		}
+	gotoxy(33, 6);
+	cout << char(197);
+	gotoxy(85, 5);
+	cout << char(179);
+	gotoxy(85, 6);
+	cout << char(180);
+	int i = 0;
+	textcolor(10);
+	gotoxy(20, 5);
+	cout << name1;
+	gotoxy(42, 5);
+	cout << name2;
+	gotoxy(63, 5);
+	cout << name3;
+	gotoxy(79, 5);
+	cout << name4;
+	textcolor(7);
+}
+void ve1()
+{
+	gotoxy(10, 6);
+	cout << char(179);
+	gotoxy(10, 5);
+	cout << char(218);
+	
+	for(int i = 0; i < 84; i++)
+		cout << char(196);
+	cout << char(191);
+	gotoxy(25, 6);
+	cout << char(179);
+	gotoxy(25, 5);
+	cout << char(194);
+	gotoxy(10, 7);
+	cout << char(195);
+	
+	for(int i = 0; i < 84; i++)
+		cout << char(196);
+		for(int i = 1; i < 4; i++)
+		{
+			gotoxy(20 + i*22, 5);
+			cout << char(194);
+			gotoxy(20 + i*22, 6);
+			cout << char(179);
+			gotoxy(20 + i*22, 7);
+			cout << char(197);
+		}
+	gotoxy(25, 7);
+	cout << char(197);
+	gotoxy(95, 6);
+	cout << char(179);
+	gotoxy(95, 7);
+	cout << char(180);
+	int i = 0;
+	textcolor(10);
+	gotoxy(12, 6);
+	cout << "Ma Vat Tu";
+	gotoxy(29, 6);
+	cout << "Ten Vat Tu";
+	gotoxy(50, 6);
+	cout << "So luong";
+	gotoxy(71, 6);
+	cout << "Don Gia";
+	gotoxy(89,6);
+	cout << "VAT(%)";
+	textcolor(7);
+}
 // Ham ve bang hien thi detail dung cho vat tu nhan vien
-int arrToaDoBangChiTet[5] = { 50,72,100,114,134 };
-void veBangChiTiet(string *arrTenCot, string tenBang, int x =0)
+int arrToaDoBangChiTet[5] = { 15,35,56,82,94 };
+void veBangChiTiet(string *arrTenCot, int x =0)
 { 
 	
 	yMap = yMap + x;
-	gotoxy(arrToaDoBangChiTet[2] -22,yMap -3);
-	cout << tenBang; // in ten bang
 	// in ten cot
 	for(int i =0; i<4;i++)
 	{
@@ -719,17 +709,17 @@ void veBangChiTiet(string *arrTenCot, string tenBang, int x =0)
 	for(int j = yMap; j <=yMap+32;j++)
 	{
 		gotoxy(arrToaDoBangChiTet[0],j);
-		cout << (char)186;
+		cout << (char)179;
 		gotoxy(arrToaDoBangChiTet[4],j);
-		cout << (char)186;
+		cout << (char)179;
 		if(j<yMap+30)
 		{
 			gotoxy(arrToaDoBangChiTet[1], j);
-			cout << (char)186;
+			cout << (char)179;
 			gotoxy(arrToaDoBangChiTet[2], j);
-			cout << (char)186;
+			cout << (char)179;
 			gotoxy(arrToaDoBangChiTet[3], j);
-			cout << (char)186;
+			cout << (char)179;
 		}
 	}
 	// ket thuc in thanh doc
@@ -738,91 +728,62 @@ void veBangChiTiet(string *arrTenCot, string tenBang, int x =0)
 		// in cac khop noi giua thnah ngang va doc
 		gotoxy(i,yMap);
 		if(i==arrToaDoBangChiTet[1] || i == arrToaDoBangChiTet[2] || i == arrToaDoBangChiTet[3])
-			cout << (char)203; 
+			cout << (char)194; 
 		
 		else if(i == arrToaDoBangChiTet[0])
-			cout << (char)201; 
+			cout << (char)218; 
 		
 		else if(i == arrToaDoBangChiTet[4])
-			cout << (char)187; 
+			cout << (char)191; 
 		
-		else cout << (char)205;
+		else cout << (char)196;
 		
 		// ket thuc
 		
 		// in thanh ngang tren
 		gotoxy(i,yMap+2);
 		if(i == arrToaDoBangChiTet[1] || i == arrToaDoBangChiTet[2] || i ==arrToaDoBangChiTet[3])
-			cout << (char)206;
+			cout << (char)197;
 	
 		else if(i == arrToaDoBangChiTet[0])
-			cout << (char)204;
+			cout << (char)195;
 			
 		else if(i == arrToaDoBangChiTet[4])
-			cout << (char)185;
+			cout << (char)180;
 		else
-			cout << (char)205;
+			cout << (char)196;
 		// in thanh ngang duoi
 		gotoxy(i,yMap + 30);
 		if (i == arrToaDoBangChiTet[1] || i == arrToaDoBangChiTet[2] || i == arrToaDoBangChiTet[3])
-			cout << (char)202;
+			cout << (char)193;
 		else if (i == arrToaDoBangChiTet[0])
-			cout << (char)204;
+			cout << (char)195;
 
 		else if (i == arrToaDoBangChiTet[4])
 		{
-			cout << (char)185;
+			cout << char(180);
 		}
 		else
 		{
-			cout << (char)205;
+			cout << (char)196;
 		}
 		gotoxy(i, yMap + 32);
 
 		if (i == arrToaDoBangChiTet[0])
 		{
-			cout << (char)200;
+			cout << (char)192;
 		}
 		else if (i == arrToaDoBangChiTet[4])
 		{
-			cout << (char)188;
+			cout << (char)217;
 		}
 		else
 		{
-			cout << (char)205;
+			cout << (char)196;
 		}
 		gotoxy(arrToaDoBangChiTet[0] + 1, yMap + 31);
-		cout << " <--Truoc                                                                   Sau-->";
+		cout << " <--Truoc                                                              Sau-->";
 		Nocursortype();
-	}
-}
-// Xoa
-string xoa="                                    ";
-void xoaNoiDungTrongKhungThem()
-{
-	for(int i = 0;i<15;i++)
-	{
-		gotoxy(xMapTh,yMapTh-5+i);
-		cout << xoa;
-	}
-}
-void xoaMenu()
-{
-	int ytam =6;
-	for(int i =0;i<24;i++)
-	{
-		gotoxy(3,ytam+i);
-		cout << xoa;
-	}
-}
-string xoa1="                                                                                                  ";
-void XoaOMain()
-{
-	int y =6;
-	for(int i =0;i<44;i++)
-	{
-		gotoxy(42,y+i);
-		cout << xoa1;
 	}
 }
                             // KET THUC HAM GIAO DIEN
@@ -913,13 +874,6 @@ int chiChoNhapSo(char so[])
 	}
 	return true;
 }
-int Ktra_Trung_MaNV(int i)
-{
-	for(int j=0;dsnv.nv[j].MaNV!="";j++)
-		if(dsnv.nv[j].MaNV==dsnv.nv[i].MaNV && j!=i)
-			return false;
-	return true;
-}
 // Ham lay nam hien tai
 int layNamHienTai(){
 	time_t now = time(0); // lay thoi gian dua tren he thong hien tai
@@ -934,9 +888,10 @@ void layNgayThangHienTai(int &ngay, int &thang,int &nam){
 	thang = ltm->tm_mon +1;
 	nam = ltm->tm_year +1900;
 }
-int lenghSo(int n){
-	return (int)log10(n) +1;
-}
+//int lenghSo(int n){
+//	return (int)log10(n) +1;
+//}
+
 
 								// KET THUC HAM PHU
 								// BAT DAU VAT TU
@@ -979,7 +934,7 @@ int soSanh2Chuoi(string a, string b) // dung de so sanh mavt khi them moi vao
 }
 Tree taoNodeVT(VATTU data)
 {
-	Tree p = new NODE_VATTU;
+	NODE_VATTU* p = new NODE_VATTU;
 	p->Data =data;
 	p->pLeft = p->pRight =NULL;
 	return p;
@@ -1021,30 +976,33 @@ NODE_VATTU* Search(Tree t, string x)
 	}
     return t;
 }
-string  arrMaVT[500]; // chua ma vat tu tam de so kiem tra trung ma
-int soVT =0;
-void LNR(Tree &t)
+NODE_VATTU* kiemTraTrungMaVT(Tree t,string maVT)
 {
 	if(t != NULL)
 	{
-		LNR(t->pLeft);
-		arrMaVT[soVT++] = t->Data.MaVT;
-		LNR(t->pRight);
-	}
-}
-int kiemTraTrungMaVT(string maVT)
-{
-	for(int i =0;i< soVT;i++)
-	{
-		if(arrMaVT[i] == maVT)
+		if(strcmp(t->Data.MaVT, maVT.c_str()) == 0)
 		{
-			return true;
+			NODE_VATTU *p = new NODE_VATTU;
+			p  = t;
+			return p;
 		}
-		else 
+		if(strcmp(t->Data.MaVT, maVT.c_str()) == 1)
+			return kiemTraTrungMaVT(t->pLeft, maVT);
+		if(strcmp(t->Data.MaVT, maVT.c_str()) == -1)
+			return kiemTraTrungMaVT(t->pRight, maVT);
+	}
+	return NULL;
+}
+int kiemTraTrungMNV(string MNV)
+{
+	for(int i=0;i<dsnv.soLuongNV+1;i++)
+	{
+		if(strcmp(dsnv.nv[i].MaNV,MNV.c_str())==0)
 		{
 			return false;
 		}
 	}
+	return true;
 }
 void timPhanTuTheMang(Tree &t1, Tree &t2)
 {
@@ -1059,22 +1017,59 @@ void timPhanTuTheMang(Tree &t1, Tree &t2)
 		t2 = t2->pRight;
 	}
 }
-void nhapVatTu(VATTU &data)
+int countNode(Tree &t)
 {
-	string maVT, tenVT,dvt;
-	BOOL ischeck=false;
+	if(t == NULL)
+	{
+		return 0;
+	}
+	else 
+	{
+		return 1+countNode(t->pLeft) + countNode(t->pRight);
+	}
+}
+string arrMVT[500];
+int nVT;
+void LNR(Tree t)
+{
+	if (t != NULL)
+	{
+		LNR(t->pLeft);
+		arrMVT[nVT++]=t->Data.MaVT;
+		LNR(t->pRight);
+	}
+}
+void nhapVatTu()
+{
+	system("cls");
+	VATTU data;
+	textcolor(10);
+	gotoxy(40,2);
+	cout << "THEM VAT TU CO THE NHAP VAO KHO";
+	gotoxy(40,3);
+	cout << "Tong so vat tu hien tai: "<< countNode(t);
+	textcolor(7);
+	veHTSearch("Ma Vat Tu","Ten Vat Tu","So luong ton","DVT");
+	string maVT="", tenVT="",dvt="";
+	bool ischeck=false;
 	int vitri, key;
 	int flag =0;
-	int loop=0,i=1;
-	gotoxy(xMapTh+12,yMapTh+i);
+	int loop=0;
+	int y;
+	int slt=0;
+	
+	VeNVVT(18,7);
+	VeNVVT2(18,7);
+	gotoxy(20,7);
+	int dong=0;
 	while(loop ==0)
 	{
 		while(!kbhit())
 		{
-			
-			if(flag ==0) vitri = xMapTh+12+maVT.length();
-			else if(flag == 1) vitri = xMapTh +12+tenVT.length();
-			else if(flag ==2) vitri = xMapTh +12+dvt.length();
+			y=7+2*dong;
+			if(flag ==0) vitri = 20+maVT.length();
+			else if(flag == 1) vitri = 35+tenVT.length();
+			else if(flag ==2) vitri = 79+dvt.length();
 			key =getch();
 			if(key == 0)
 			{
@@ -1082,14 +1077,22 @@ void nhapVatTu(VATTU &data)
 			}
 			else if(key == 27)
 			{
-				loop =1;
-				break;
+				if(veKhungYesNo("       Ban co muon thoat?",0))
+				{
+					system("cls");
+					return;
+				}
+				else
+				{
+					xoaKhungYN();
+					continue;
+				}
 			}
 			else if((key >= 48&& key <=57) || (key >=97 && key <=122) || (key >=65 && key <=90) || key == 32)
 			{
 				if(flag == 0 && maVT.size()<10 && key !=32)
 				{
-					gotoxy(vitri,yMapTh+i);
+					gotoxy(vitri,y);
 					if(key >=97 && key <=122)
 						key = key -32;
 					cout << (char)key;
@@ -1097,9 +1100,18 @@ void nhapVatTu(VATTU &data)
 				}
 				else if(flag ==1 && tenVT.size() < 20)
 				{
-					gotoxy(vitri,yMapTh+i);
-					if((key >=97 && key <=122)&& (vitri-(xMapTh+12) ==0))
-						key = key -32;
+					gotoxy(vitri,y);
+					if(vitri == vitri -tenVT.size())
+					{
+						if(key == 32)
+						{
+							flag=1;
+							continue;
+						}
+						if((key >=97 && key <=122))
+							key = key -32;
+					}
+					
 					else
 					{
 						if(key >=65 && key <=90)
@@ -1113,9 +1125,17 @@ void nhapVatTu(VATTU &data)
 				}
 				else if(flag ==2 && dvt.size() < 8 && key !=32)
 				{
-					gotoxy(vitri,yMapTh+i);
-					if((key >=97 && key <=122)&& (vitri-(xMapTh+12) ==0))
-						key = key -32;
+					gotoxy(vitri,y);
+					if(vitri == vitri -dvt.size())
+					{
+						if(key == 32)
+						{
+							flag=2;
+							continue;
+						}
+						if((key >=97 && key <=122))
+							key = key -32;
+					}
 					else
 					{
 						if(key >=65 && key <=90)
@@ -1134,39 +1154,38 @@ void nhapVatTu(VATTU &data)
 					if(maVT.size() ==0)
 					{
 						while(!kbhit())
-							Canhbao("Khong duoc de trong.Xin nhap lai!!",46,3);
+							Canhbao("Khong duoc de trong.Xin nhap lai!!",30,1);
 						do{
 							int key1 = getch();
 							
 						}while(key!=13&&key!=27);
-						gotoxy(vitri,yMapTh+i);
+						gotoxy(vitri,y);
 					}
 					else if(kiemTraDoDaiMaVT(maVT) == false)
 					{
 						while(!kbhit())
 						{
-							Canhbao("Do dai ma vat tu phai la 10 ky tu.Xin nhap lai",46,3);
+							Canhbao("Do dai ma vat tu phai la 10 ky tu.Xin nhap lai",30,1);
 						}
 						do{
 							int key1 = getch();
 						}while(key!=13&&key!=27);
-						gotoxy(vitri,yMapTh+i);
+						gotoxy(vitri,y);
 					}
-					else if(kiemTraTrungMaVT(maVT) == true)
+					else if(kiemTraTrungMaVT(t,maVT) !=NULL)
 					{
 							while(!kbhit())
 						{
-							Canhbao("Ma "+maVT+" da ton tai trong he thong.Xin nhap lai",46,3);
+							Canhbao("Ma "+maVT+" da ton tai trong he thong.Xin nhap lai",30,1);
 						}
 						do{
 							int key1 = getch();
 						}while(key!=13&&key!=27);
-						gotoxy(vitri,yMapTh+i);
+						gotoxy(vitri,y);
 					}
 					else
 					{
-						i=3;
-						gotoxy(xMapTh+12,yMapTh+i);
+						gotoxy(35,y);
 						flag =1;
 					}
 				}
@@ -1175,18 +1194,18 @@ void nhapVatTu(VATTU &data)
 					if(tenVT.size() ==0)
 					{
 						while(!kbhit())
-							Canhbao("Khong duoc de trong.Xin nhap lai!!",46,3);
+							Canhbao("Khong duoc de trong.Xin nhap lai!!",30,1);
 						do{
 							int key1 = getch();
 							
 						}while(key!=13&&key!=27);
-						gotoxy(vitri,yMapTh+i);
+						gotoxy(vitri,y);
 					}
 					else
 					{
-						
-						i=5;
-						gotoxy(xMapTh+12,yMapTh+i);
+						gotoxy(60,y);
+						cout << "     "<<slt;
+						gotoxy(79,y);
 						flag =2;
 					}
 				}
@@ -1195,21 +1214,32 @@ void nhapVatTu(VATTU &data)
 					if(dvt.size() ==0)
 					{
 						while(!kbhit())
-							Canhbao("Khong duoc de trong.Xin nhap lai!!",46,3);
+							Canhbao("Khong duoc de trong.Xin nhap lai!!",30,1);
 						do{
 							int key1 = getch();
 							
 						}while(key!=13&&key!=27);
-						gotoxy(vitri,yMapTh+i);
+						gotoxy(vitri,y);
 					}
 					else
 					{
 						strcpy(data.MaVT,maVT.c_str());
 						strcpy(data.TenVT,tenVT.c_str());
 						strcpy(data.DVT,dvt.c_str());
-						data.SoLuongTon =0;
-						loop =1;
-						break;	   
+						data.SoLuongTon =slt;
+						Insert(t,data);
+						textcolor(10);
+						gotoxy(65,3);
+						cout << countNode(t);
+						textcolor(7);
+						dong++;
+						maVT="";
+						tenVT="";
+						dvt="";
+						VeNVVT(18,7+dong*2);
+						VeNVVT2(18,7+dong*2);
+						gotoxy(20,7+dong*2);
+						flag =0;
 					}
 				}
 				
@@ -1219,131 +1249,132 @@ void nhapVatTu(VATTU &data)
 				if(flag ==0 && maVT.size() > 0)
 				{
 					vitri--;
-					gotoxy(vitri,yMapTh+i);
+					gotoxy(vitri,y);
 					cout << " ";
-					gotoxy(vitri,yMapTh+i);
+					gotoxy(vitri,y);
 					maVT.erase(maVT.end()-1);
 				}
-				else if(flag ==1 && tenVT.size() >0)
+				else if(flag ==1 && tenVT.size() >=0)
 				{
-					vitri--;
-					gotoxy(vitri,yMapTh+i);
-					cout << " ";
-					gotoxy(vitri,yMapTh+i);
-					tenVT.erase(tenVT.end()-1);
+					if(vitri==vitri-tenVT.size())
+					{
+						gotoxy(20+maVT.size(),y);
+						flag=0;
+					}
+					else
+					{
+						vitri--;
+						gotoxy(vitri,y);
+						cout << " ";
+						gotoxy(vitri,y);
+						tenVT.erase(tenVT.end()-1);
+					}
+					
 				}
-				else if(flag ==2&&dvt.size()>0)
+				else if(flag ==2&&dvt.size()>=0)
 				{
-					vitri--;
-					gotoxy(vitri,yMapTh+i);
-					cout << " ";
-					gotoxy(vitri,yMapTh+i);
-					dvt.erase(dvt.end()-1);
+					if(vitri==vitri-dvt.size())
+					{
+						gotoxy(35+tenVT.size(),y);
+						flag=1;
+					}
+					else
+					{
+						vitri--;
+						gotoxy(vitri,y);
+						cout << " ";
+						gotoxy(vitri,y);
+						dvt.erase(dvt.end()-1);
+					}
+					
+					
 				}
 			}
 		}
 	}
-	if(loop == 1) return;
-}
-void themVatTu(Tree &t)
-{
-	string arr[4] ={"Ma VT", "Ten VT", "DVT"};
-	vebangThemMoi(arr,3);
-	LNR(t);
-	VATTU data;
-	nhapVatTu(data);
-	Insert(t,data);
 }
 
 void xuatVattu(VATTU data,int stt)
 {
-	gotoxy(57,3+yMap +stt*2);
+	gotoxy(20,3+yMap +stt*2);
 	cout << data.MaVT;
-	gotoxy(72+1+((28-string(data.TenVT).size())/2),3+yMap +stt*2);
+	gotoxy(36+((21-strlen(data.TenVT))/2),3+yMap +stt*2);
 	cout << data.TenVT;
-	gotoxy(100+1+((14-string(data.DVT).size())/2),3+yMap +stt*2);
-	cout << data.DVT;
-	gotoxy(114+1+((20-to_String(data.SoLuongTon).size())/2),3+yMap +stt*2);
+	gotoxy(57+((26-to_String(data.SoLuongTon).size())/2),3+yMap +stt*2);
 	cout << data.SoLuongTon;
+	gotoxy(75+((27-strlen(data.DVT))/2),3+yMap +stt*2);
+	cout << data.DVT;
 }
-void xoaNodeVT(Tree &t, string maVT, int &dem)
+void xoaNodeVT(Tree &t, string maVT)
 {
 	if(t == NULL)
 	{
-		Canhbao("Khong co vat tu nao trong kho!!!!",46,3);
-		getch();
-		system("Pause");
-        return ;
+		veKhungTB("         Khong co vat tu");
+		system("cls");
+		return;
 	}
    if(strcmp(t->Data.MaVT,maVT.c_str())== 1)
 	{
-		xoaNodeVT(t->pLeft,maVT,dem);
+		xoaNodeVT(t->pLeft,maVT);
 	}
 	else if(strcmp(t->Data.MaVT,maVT.c_str())== -1)
 	{
-		xoaNodeVT(t->pRight,maVT,dem);
+		xoaNodeVT(t->pRight,maVT);
 	}
 	else
 	{
-		gotoxy(xMapTimKiem,yMapTimKiem+5);
-		cout << "Ban Co chac cha muon xoa vat tu co ma so " << t->Data.MaVT << " khong? (Y/N)";
-		while(!kbhit())
+		NODE_VATTU *p =t;
+		if(t->pLeft == NULL)
 		{
-			int key = getch();
-			if(key == 81 || key ==121)
-			{
-				NODE_VATTU *p =t;
-				if(t->pLeft == NULL)
-				{
-					t =t->pRight;
-				}
-				else if(t->pRight == NULL)
-				{
-					t =t->pLeft;
-				}
-				else
-				{
-					timPhanTuTheMang(p,t->pRight);
-				}
-				dem--;
-				delete p;
-				return;
-			}
-			else if(key == 78 || key == 110)
-			{
-				return;
-			}
+			t =t->pRight;
 		}
+		else if(t->pRight == NULL)
+		{
+			t =t->pLeft;
+		}
+		else
+		{
+			timPhanTuTheMang(p,t->pRight);
+		}
+		delete p;
+		return;
 	}
 }
-void xuatDanhSachVT(Tree t,int page)
+void xuatDanhSachVT(int page)
+{
+	system("cls");
+	Nocursortype();
+	gotoxy(38,2);
+	cout << "BANG DANH SACH VAT TU CO TRONG KHO";
+	string arr[4] ={"Ma vat tu", "Ten vat tu", "So luong ton","DVT"};
+	veBangChiTiet(arr,3);
+	int k =0;
+	LNR(t);
+	for(int i = page * 14; i < (nVT > (page + 1) * 14 ? 14 : nVT) ;i++)
+	{
+		NODE_VATTU *p = new NODE_VATTU;
+		p = Search(t,arrMVT[i]);
+		xuatVattu(p->Data,k++);
+	}
+	
+}
+void quanLysangTrangVT()
 {
 	if(t == NULL)
 	{
-		Canhbao("Khong co vat tu nao trong kho",46,3);
-		//KhungThongBaoXN("          Kho vat tu trong");
-		system("Pause");
-        return ;
+		veKhungTB("         Khong co vat tu");
+		system("cls");
+		return;
 	}
-	Nocursortype();
-	string arr[4] ={"Ma vat tu", "Ten vat tu", "Don vi tinh","So luong ton"};
-	string name ="BANG DANH SACH VAT TU CO TRONG KHO";
-	veBangChiTiet(arr,name,10);
-	int k =0;
-	for(int i = page * 14; i < (soVT > (page + 1) * 14 ? 14 : soVT) ;i++)
-	{
-		NODE_VATTU *p = new NODE_VATTU;
-		p = Search(t,arrMaVT[i]);
-		xuatVattu(p->Data,k++);
-	}
-}
-void quanLysangTrangVT(Tree t)
-{
-	int page =0,i=0,vitri;
+	int page =0,i=0,vitri=0;
 	int key;
-	xuatDanhSachVT(t,page);
+	if(t !=NULL)
+		xuatDanhSachVT(page);
 	while(true)
 	{
+			
+		while(!kbhit())
+		{
 			key = getch();
 			if(key == 0)
 			{
@@ -1355,108 +1386,53 @@ void quanLysangTrangVT(Tree t)
 				if(key == 77 && page >0)
 				{
 					page--;
-					i = page*12;
+					i = page*14;
 					vitri =0;
 					break;
 				}
-				else if(key == 77 && page < (soVT%14 ==0? (soVT /14) : (soVT / 14) +1) -1)
+				else if(key == 77 && page < (nVT%14 ==0? (nVT /14) : (nVT / 14) +1) -1)
 				{
 					page++;
 					vitri =0;
-					i = page *12;
+					i = page *14;
 					break;
 				}
 			}
 			else if(key == 27)
 			{
+				system("cls");
 				return;
 			}
-
-	}
-}
-void xoaVatTu(Tree &t,int &dem)
-{
-	if(t==NULL)
-	{
-		Canhbao("Khong co vat tu nao trong kho!",46,3);
-		system("Pause");
-        return ;
-	}
-
-     veOTimKiem("Ma Vat tu");
-     LNR(t);
-		string mavt;
-		int loop =1;
-		int key,vitri;
-		while(loop ==1)
-		{
-			while(!kbhit())
-			{
-				vitri = xMapTimKiem+23+mavt.size();
-				key =getch();
-				if(key ==27)
-				{
-					loop =0;
-					break;
-				}
-				else if((key >= 48&& key <=57) || (key >=97 && key <=122) || (key >=65 && key <=90))
-				{
-					if(mavt.length()  <10)
-					{
-		 				gotoxy(vitri,yMapTimKiem+1);
-						if(key >=97 && key <=122)
-							key = key -32;
-						cout << (char)key;
-						mavt.insert(mavt.end(),1,(char)key);
-				   }
-				}
-				else if(key ==13)
-				{
-					if(kiemTraTrungMaVT(mavt) == false)
-					{
-						while(!kbhit())
-							Canhbao("Khong tim thay ma vat tu "+mavt+".Xin kiem tra lai!!",45,3);
-						do{
-							int key1 = getch();
-						}while(key!=13);
-						gotoxy(vitri,yMapTimKiem+1);
-					}
-					else
-					{
-						loop =0;
-						break;
-					}
-				}
-				else if(key == 8 && mavt.length() >0)
-				{
-					vitri--;
-					gotoxy(vitri,yMapTimKiem+1);
-					cout << " ";
-					gotoxy(vitri,yMapTimKiem+1);
-					mavt.erase(mavt.end()-1);
-				}
-			}
-		}
-		xoaNodeVT(t,mavt,dem);
-}
-void timKiemVT(Tree &t,int &dem)
-{
-	if(t==NULL)
-	{
-		Canhbao("Khong co vat tu nao trong kho!",46,3);
-		system("Pause");
-        return;
-	}
-		veOTimKiem("Ma Vat tu");
+		}	
+		nVT =0;
 		LNR(t);
-		string mavt;
-		int loop =1;
-		int key,vitri;
+		xuatDanhSachVT(page);
+		if(nVT !=0&& nVT%14==0)
+		{
+			page++;
+		}
+	}
+}
+void xoaVatTu()
+{
+	if(t==NULL)
+	{
+		veKhungTB("         Khong co vat tu");
+		system("cls");
+		return;
+	}
+	system("cls");
+     gotoxy(36,2);
+    cout << "Ma vat tu: ";
+	string mavt;
+	int loop =1;
+	int key,vitri;	
+	int y=2;
 		while(loop ==1)
 		{
 			while(!kbhit())
 			{
-				vitri = xMapTimKiem+23+mavt.size();
+				vitri = 47+mavt.size();
 				key =getch();
 				if(key ==27)
 				{
@@ -1467,7 +1443,7 @@ void timKiemVT(Tree &t,int &dem)
 				{
 					if(mavt.length()  <10)
 					{
-		 				gotoxy(vitri,yMapTimKiem+1);
+		 				gotoxy(vitri,y);
 						if(key >=97 && key <=122)
 							key = key -32;
 						cout << (char)key;
@@ -1476,320 +1452,459 @@ void timKiemVT(Tree &t,int &dem)
 				}
 				else if(key ==13)
 				{
-					if(kiemTraTrungMaVT(mavt) == false)
+					if(kiemTraTrungMaVT(t,mavt) == NULL)
 					{
 						while(!kbhit())
-							Canhbao("Khong tim thay ma vat tu "+mavt+".Xin kiem tra lai!!",45,3);
+							Canhbao("Khong tim thay ma vat tu "+mavt+".Xin kiem tra lai!!",30,1);
 						do{
 							int key1 = getch();
 						}while(key!=13);
-						gotoxy(vitri,yMapTimKiem+1);
+						gotoxy(vitri,y);
 					}
 					else
 					{
-						loop =0;
-						break;
+						system("cls");
+						NODE_VATTU* p = Search(t,mavt);
+						veHTSearch("Ma Vat Tu","Ten Vat Tu","So Luong Ton","DVT");
+						gotoxy(36,2);
+						cout << "Ma Vat Tu: "<<mavt;
+						VeNVVT(18,7);
+						VeNVVT2(18,7);
+						gotoxy(20,7);
+						cout << p->Data.MaVT;
+						gotoxy(36+((18-strlen(p->Data.TenVT)))/2,7);
+						cout << p->Data.TenVT;
+						gotoxy(68,7);
+						cout << p->Data.SoLuongTon;
+						gotoxy(79+((6-strlen(p->Data.DVT)))/2,7);
+						cout << p->Data.DVT;
+						if(veKhungYesNo("Ban co muon xoa "+mavt+"?",0))
+						{
+							xoaNodeVT(t,mavt);
+							system("cls");
+							veKhungTB(" Xoa thanh cong "+mavt+"");
+							system("cls");
+							return;
+						}
+						else
+						{
+							NODE_VATTU* p = Search(t,mavt);
+							system("cls");
+							gotoxy(36,2);
+							cout << "Ma Vat Tu: "<<mavt;
+							veHTSearch("Ma Vat Tu","Ten Vat Tu","So Luong Ton","DVT");
+							VeNVVT(18,7);
+							VeNVVT2(18,7);
+							gotoxy(20,7);
+							cout << p->Data.MaVT;
+							gotoxy(36+((18-strlen(p->Data.TenVT)))/2,7);
+							cout << p->Data.TenVT;
+							gotoxy(68,7);
+							cout << p->Data.SoLuongTon;
+							gotoxy(79+((6-strlen(p->Data.DVT)))/2,7);
+							cout << p->Data.DVT;
+							veKhungTB("         Da huy xoa ");
+							system("cls");
+							return;
+						}
+						return;
 					}
 				}
 				else if(key == 8 && mavt.length() >0)
 				{
 					vitri--;
-					gotoxy(vitri,yMapTimKiem+1);
+					gotoxy(vitri,y);
 					cout << " ";
-					gotoxy(vitri,yMapTimKiem+1);
+					gotoxy(vitri,y);
 					mavt.erase(mavt.end()-1);
 				}
 			}
 		}
-		if(loop==0)
-		{
-			NODE_VATTU* p = Search(t,mavt);
-			string arr[]={"Ma VT","Ten VT","DVT","So luong ton"};
-			
-			veBangChiTiet(arr,"THONG TIN CHI TIET VAT TU VUA TIM",12);
-			gotoxy(arrToaDoBangChiTet[0]+1,3+yMap);
-			cout << p->Data.MaVT;
-			gotoxy(arrToaDoBangChiTet[1]+1,3+yMap);
-			cout << p->Data.TenVT;
-			gotoxy(arrToaDoBangChiTet[2]+1,3+yMap);
-			cout << p->Data.DVT;
-			gotoxy(arrToaDoBangChiTet[3]+1,3+yMap);
-			cout << p->Data.SoLuongTon;
-		}
 }
-int countNode(Tree &t)
-{
-	if(t == NULL)
-	{
-		return 0;
-	}
-	else 
-	{
-		return 1+countNode(t->pLeft) + countNode(t->pRight);
-	}
-}
-void hieuChinhVatTu(Tree &t)
+void timKiemVT()
 {
 	if(t==NULL)
 	{
-		Canhbao("Khong co vat tu nao trong kho!",46,3);
-		system("Pause");
-        return ;
+		veKhungTB("         Khong co vat tu");
+		system("cls");
+		return;
 	}
-	veOTimKiem("Ma Vat tu");
+	system("cls");
+		gotoxy(36,2);
+		cout << "Ma Vat tu: ";
+		string mavt;
+		int loop =1;
+		int key,vitri;
+		int y =2;
+		while(loop ==1)
+		{
+			while(!kbhit())
+			{
+				vitri = 47+mavt.size();
+				key =getch();
+				if(key ==27)
+				{
+					system("cls");
+					loop =0;
+					break;
+				}
+				else if((key >= 48&& key <=57) || (key >=97 && key <=122) || (key >=65 && key <=90))
+				{
+					if(mavt.length()  <10)
+					{
+		 				gotoxy(vitri,y);
+						if(key >=97 && key <=122)
+							key = key -32;
+						cout << (char)key;
+						mavt.insert(mavt.end(),1,(char)key);
+				   }
+				}
+				else if(key ==13)
+				{
+					if(kiemTraTrungMaVT(t,mavt) == NULL)
+					{
+						while(!kbhit())
+							Canhbao("Khong tim thay ma vat tu "+mavt+".Xin kiem tra lai!!",30,1);
+						do{
+							int key1 = getch();
+						}while(key!=13);
+						gotoxy(vitri,y);
+					}
+					else
+					{
+						system("cls");
+						NODE_VATTU* p = Search(t,mavt);
+						veHTSearch("Ma Vat Tu","Ten Vat Tu","So Luong Ton","DVT");
+						VeNVVT(18,7);
+						VeNVVT2(18,7);
+						gotoxy(20,7);
+						cout << p->Data.MaVT;
+						gotoxy(36+((18-strlen(p->Data.TenVT))/2),7);
+						cout << p->Data.TenVT;
+						gotoxy(68,7);
+						cout << p->Data.SoLuongTon;
+						gotoxy(79+((6-strlen(p->Data.DVT))/2),7);
+						cout << p->Data.DVT;
+					}
+				}
+				else if(key == 8 && mavt.length() >0)
+				{
+					vitri--;
+					gotoxy(vitri,y);
+					cout << " ";
+					gotoxy(vitri,y);
+					mavt.erase(mavt.end()-1);
+				}
+			}
+		}
+}
+void hieuChinhVatTu()
+{
+	if(t==NULL)
+	{
+		veKhungTB("         Khong co vat tu");
+		system("cls");
+		return;
+	}
+	system("cls");
+	gotoxy(36,2);
+	cout << "Ma Vat Tu: ";
 	string mavt;
-	LNR(t);
 	int loop =0;
-	int key,vitri;
+	int key1,vitri1;
+	NODE_VATTU * q;
 	while(loop ==0)
 	{
 		while(!kbhit())
 		{
-			vitri = xMapTimKiem+23+mavt.size();
-			key =getch();
-			if(key ==27)
+			vitri1 = 48+mavt.size();
+			key1 =getch();
+			if(key1 ==27)
 			{
+				system("cls");
 				loop =2;
 				break;
 			}
-			else if((key >= 48&& key <=57) || (key >=97 && key <=122) || (key >=65 && key <=90))
+			else if((key1 >= 48&& key1 <=57) || (key1 >=97 && key1 <=122) || (key1 >=65 && key1 <=90))
 			{
 				if(mavt.length()  <10)
 				{
-		 			gotoxy(vitri,yMapTimKiem+1);
-					if(key >=97 && key <=122)
-						key = key -32;
-					cout << (char)key;
-					mavt.insert(mavt.end(),1,(char)key);
+		 			gotoxy(vitri1,2);
+					if(key1 >=97 && key1 <=122)
+						key1 = key1 -32;
+					cout << (char)key1;
+					mavt.insert(mavt.end(),1,(char)key1);
 				}
 			}
-			else if(key ==13)
+			else if(key1 ==13)
 			{
-				if(kiemTraTrungMaVT(mavt) == false)
+				if(kiemTraTrungMaVT(t,mavt) == NULL)
 				{
 					while(!kbhit())
-						Canhbao("Khong tim thay ma vat tu "+mavt+".Xin kiem tra lai!!",45,3);
+						Canhbao("Khong tim thay ma vat tu "+mavt+".Xin kiem tra lai!!",30,1);
 					do{
-						int key1 = getch();
-					}while(key!=13);
-					gotoxy(vitri,yMapTimKiem+1);
+						int key2 = getch();
+					}while(key1!=13);
+					gotoxy(vitri1,2);
 				}
 				else
 				{
+					q = Search(t,mavt);
+					veHTSearch("Ma Vat Tu","Ten Vat Tu","So Luong Ton","DVT");
+					VeNVVT(18,7);
+					VeNVVT2(18,7);
+					gotoxy(20,7);
+					cout << q->Data.MaVT;
+					gotoxy(35,7);
+					cout << q->Data.TenVT;
+					gotoxy(57,7);
+					cout << q->Data.SoLuongTon;
+					gotoxy(79,7);
+					cout << q->Data.DVT;
 					loop =1;
 					break;
 				}
 			}
-			else if(key == 8 && mavt.length() >0)
+			else if(key1 == 8 && mavt.length() >0)
 			{
-				vitri--;
-				gotoxy(vitri,yMapTimKiem+1);
+				vitri1--;
+				gotoxy(vitri1,2);
 				cout << " ";
-				gotoxy(vitri,yMapTimKiem+1);
+				gotoxy(vitri1,2);
 				mavt.erase(mavt.end()-1);
 			}
 		}
 	}
-	if(loop ==2) return;
-	else if(loop==1)
+	int exit =0;
+	int key,vtr;
+	string tam1 = q->Data.MaVT,tam2=q->Data.TenVT,tam3=q->Data.DVT;
+	int slt = q->Data.SoLuongTon;
+	int th=3;
+	gotoxy(79+tam3.size(),7);
+	while(exit ==0)
+	{
+		while(!kbhit())
 		{
-			
-			NODE_VATTU* p = Search(t,mavt);
-			string tenvt= p->Data.TenVT,dvt=p->Data.DVT;
-			string arr[]={"Ma VT","Ten VT","DVT"};
-			vebangThemMoi(arr,3);
-			gotoxy(xMapTh+12,1+yMapTh);
-			cout << mavt;
-			gotoxy(xMapTh+12,3+yMapTh);
-			cout << tenvt;
-			gotoxy(xMapTh+12,5+yMapTh);
-			cout << dvt;
-			int key, vitri;
-			int flag =1;
-			int loop =0;
-			int i =1;
-			while(loop ==0)
+			if(th==1)
 			{
-				while(!kbhit())
+				vtr = 20+tam1.size();
+			}
+			else if(th==2)
+			{
+				vtr = 35+tam2.size();
+			}
+			else if(th ==3)
+			{
+				vtr = 79+tam3.size();
+			}
+			key = getch();
+			if(key == 0)
+			{
+				key == getch();
+			}
+			else if((key >= 48&& key <=57) || (key >=97 && key <=122) || (key >=65 && key <=90) || key ==32)
+			{
+				if(th==1 && tam1.size() <10&& key !=32)
 				{
-					if(flag ==1) vitri =xMapTh +12+mavt.size();
-					else if(flag ==2) vitri = xMapTh+12+tenvt.size();
-					else if(flag ==3) vitri = xMapTh +12+dvt.size();
-					if(key == 0)
+					gotoxy(vtr,7);
+					if(key >=97 && key <=122)
+						key = key -32;
+					cout << (char)key;
+					tam1.insert(tam1.end(),1,(char)key);
+				}
+				else if(th==2 && tam2.size() < 20)
+				{
+					gotoxy(vtr,7);
+					if((key >=97 && key <=122)&& (vtr==vtr-tam2.size()))
+						key = key -32;
+					else
 					{
-						key = getch();
-					}
-					if(key == 27)
-					{
-						loop =1;
-						return;
-					}
-					else if((key >= 48&& key <=57) || (key >=97 && key <=122) || (key >=65 && key <=90))
-					{
-						if(flag == 1 && mavt.size()<10)
+						if(key >=65 && key <=90)
 						{
-							gotoxy(vitri,yMapTh+i);
-							if(key >=97 && key <=122)
-								key = key -32;
-							cout << (char)key;
-							mavt.insert(mavt.end(),1,(char)key);
-						}
-						else if(flag ==2 && tenvt.size() < 30)
-						{
-							gotoxy(vitri,yMapTh+i);
-							if((key >=97 && key <=122)&& (vitri-(xMapTh+12) ==1))
-								key = key -32;
-							else
-							{
-								if(key >=65 && key <=90)
-								{
-									key = key +32;
-								}
-							}
-							cout << (char)key;
-							tenvt.insert(tenvt.end(),1,(char)key);
-						}
-						else if(flag ==3 && dvt.size() <8)
-						{
-							gotoxy(vitri,yMapTh+i);
-							if((key >=97 && key <=122)&& (vitri-(xMapTh+12) ==1))
-								key = key -32;
-							else
-							{
-								if(key >=65 && key <=90)
-								{
-									key = key +32;
-								}
-							}
-							cout << (char)key;
-							dvt.insert(dvt.end(),1,(char)key);
+							key = key +32;
 						}
 					}
-					else if(key ==8)
+					cout << char(key);
+					tam2.insert(tam2.end(),1,(char)key);
+				}
+				else if(th==3 && tam3.size() <5)
+				{
+					gotoxy(vtr,7);
+					if((key >=97 && key <=122)&& (vtr==vtr-tam3.size()))
+						key = key -32;
+					else
 					{
-						if(flag ==1 && mavt.size() > 0)
+						if(key >=65 && key <=90)
 						{
-							vitri--;
-							gotoxy(vitri,yMapTh+i);
-							cout << " ";
-							gotoxy(vitri,yMapTh+i);
-							mavt.erase(mavt.end()-1);
-						}
-						else if(flag ==2 && tenvt.size() >0)
-						{
-							vitri--;
-							gotoxy(vitri,yMapTh+i);
-							cout << " ";
-							gotoxy(vitri,yMapTh+i);
-							tenvt.erase(tenvt.end()-1);
-						}
-						else if(flag ==3&&dvt.size()>0)
-						{
-							vitri--;
-							gotoxy(vitri,yMapTh+i);
-							cout << " ";
-							gotoxy(vitri,yMapTh+i);
-							dvt.erase(dvt.end()-1);
+							key = key +32;
 						}
 					}
-					else if(key ==13 || key ==9)
+					cout << char(key);
+					tam3.insert(tam3.end(),1,(char)key);
+				}
+			}
+			else if(key ==13||key ==9)
+			{
+				if(th==1)
+				{
+					if(tam1.size()==0)
 					{
-						if(flag ==1)
+						tam1=q->Data.MaVT;
+						gotoxy(20,7);
+						cout << tam1;
+						gotoxy(35+tam2.size(),7);
+						th=2;
+					}
+					else if(tam1.size() <10)
+					{
+						while(!kbhit())
+							Canhbao("Ma vat tu la 10 ky tu.Xin nhap lai lai!!",30,1);
+						do{
+							int key2 = getch();
+						}while(key!=13);
+						gotoxy(vtr,7);
+					}
+					if(strcmp(tam1.c_str(),q->Data.MaVT)==0)
+					{
+						tam1=q->Data.MaVT;
+						gotoxy(20,7);
+						cout << tam1;
+						gotoxy(35+tam2.size(),7);
+						th=2;
+					}
+					else if(kiemTraTrungMaVT(t,tam1)!=NULL)
+					{
+						while(!kbhit())
+							Canhbao("Trung ma vat tu.Xin kiem tra lai!!",30,1);
+						do{
+							int key2 = getch();
+						}while(key!=13);
+						gotoxy(vtr,7);
+					}
+					else
+					{
+						gotoxy(35+tam2.size(),7);
+						th=2;
+					}
+				}
+				else if(th==2)
+				{
+					if(tam2.size()==0)
+					{
+						tam2=q->Data.TenVT;
+						gotoxy(35,7);
+						cout << tam2;
+					}
+					else{
+						gotoxy(79+tam3.size(),7);
+						th=3;
+					}
+				}
+				else if(th==3)
+				{
+					if(tam3.size()==0)
+					{
+						tam3=q->Data.DVT;
+						gotoxy(79,7);
+						cout << tam3;
+					}
+					else{
+						
+						if(veKhungYesNo("    Ban co muon thay doi khong ?",0))
 						{
-							if(mavt.size() ==0)
-							{
-								mavt = p->Data.MaVT;
-							}
-							else if(kiemTraDoDaiMaVT(mavt) == false)
-							{
-								while(!kbhit())
-								{
-									Canhbao("Do dai ma vat tu phai la 10 ky tu.Xin nhap lai",46,3);
-								}
-								do{
-									int key1 = getch();
-								}while(key!=13&&key!=27);
-								gotoxy(vitri,yMapTh+i);
-							}
-							else if(kiemTraTrungMaVT(mavt) == true)
-							{
-								while(!kbhit())
-								{
-									Canhbao("Ma "+mavt+" da ton tai trong he thong.Xin nhap lai",46,3);
-								}
-								do{
-									int key1 = getch();
-								}while(key!=13&&key!=27);
-								gotoxy(vitri,yMapTh+i);
-							}
-							else
-							{
-								i=3;
-								gotoxy(xMapTh+12,yMapTh+i);
-								flag =1;
-							}
+							
+							
+							strcpy(q->Data.MaVT,tam1.c_str());
+							strcpy(q->Data.TenVT,tam2.c_str());
+							q->Data.SoLuongTon = slt;
+							strcpy(q->Data.DVT,tam3.c_str());
+							system("cls");
+							gotoxy(36,2);
+							cout << "Ma Vat Tu: " << q->Data.MaVT;
+							veHTSearch("Ma Vat Tu","Ten Vat Tu","So Luong Ton","DVT");
+							VeNVVT(18,7);
+							VeNVVT2(18,7);
+							gotoxy(20,7);
+							cout << q->Data.MaVT;
+							gotoxy(35,7);
+							cout << q->Data.TenVT;
+							gotoxy(57,7);
+							cout << q->Data.SoLuongTon;
+							gotoxy(79,7);
+							cout << q->Data.DVT;
+							veKhungTB("        Da sua thanh cong");
+							system("cls");
+							return;
 						}
-						else if(flag ==2)
+						else
 						{
-							if(tenvt.size() ==0)
-							{
-								tenvt= p->Data.TenVT;
-							}
-							else
-							{
-								i=5;
-								gotoxy(xMapTh+12,yMapTh+i);
-								flag =2;
-							}
-						}
-						else if(flag ==3)
-						{
-							if(dvt.size() ==0)
-							{
-								dvt = p->Data.DVT;
-							}
-							else
-							{
-								strcpy(p->Data.MaVT,mavt.c_str());
-								strcpy(p->Data.TenVT,tenvt.c_str());
-								strcpy(p->Data.DVT,dvt.c_str());
-								p->Data.SoLuongTon =0;
-								loop =1;
-								break;	   
-							}
+							system("cls");
+							gotoxy(36,2);
+							cout << "Ma Vat Tu: " << q->Data.MaVT;
+							veHTSearch("Ma Vat Tu","Ten Vat Tu","So Luong Ton","DVT");
+							VeNVVT(18,7);
+							VeNVVT2(18,7);
+							gotoxy(20,7);
+							cout << q->Data.MaVT;
+							gotoxy(35,7);
+							cout << q->Data.TenVT;
+							gotoxy(57,7);
+							cout << q->Data.SoLuongTon;
+							gotoxy(79,7);
+							cout << q->Data.DVT;
+							veKhungTB("        Da huy tac vu sua");
+							system("cls");
+							return;
 						}
 					}
 				}
 			}
-			if(loop ==1) return;
-		}
-	}
-
-void XuatDanhSach10VT(Tree t)
-{
-	if(t == NULL)
-	{
-		Canhbao("Khong co vat tu nao trong kho.",46,3);
-		system("PAUSE");
-		return;
-	}
-	string maVT[500];
-	string arr[]={"Ma VT","Ten VT","DVT","So luong ton"};
-	veBangChiTiet(arr,"DANH SACH 10 VAT TU CO TAN SUAT CAO",10);
-	int vitri, dem = 0,max;
-	int tham[500] ={0};
-	while(dem < countNode(t))
-	{
-		for(int i =0;i<countNode(t);i++)
-		{
-			if(tham[i]==0)
+			else if(key ==8)
 			{
-					
+				if(th==1 && tam1.size() > 0)
+				{
+					vtr--;
+					gotoxy(vtr,7);
+					cout << " ";
+					gotoxy(vtr,7);
+					tam1.erase(tam1.end()-1);
+				}
+				else if(th ==2 && tam2.size() >=0)
+				{
+					if(vtr==vtr-tam2.size())
+					{
+						gotoxy(20+tam1.size(),7);
+						th=1;
+					}
+					else
+					{
+						vtr--;
+					gotoxy(vtr,7);
+					cout << " ";
+					gotoxy(vtr,7);
+					tam2.erase(tam2.end()-1);
+					}
+				}
+				else if(th ==3 && tam3.size() >=0)
+				{
+					if(vtr==vtr-tam3.size())
+					{
+						gotoxy(35+tam2.size(),7);
+						th=2;
+					}
+					else
+					{
+					vtr--;
+					gotoxy(vtr,7);
+					cout << " ";
+					gotoxy(vtr,7);
+					tam3.erase(tam3.end()-1);
+					}
+				}
 			}
 		}
 	}
 }
-
 void doiCho2So(int &a, int &b)
 {
 	int temp =a;
@@ -1801,60 +1916,127 @@ void doiCho2So(int &a, int &b)
 
 								// KET THUC VAT TU
 								// NHAN VIEN
+void themNV(string MNV,string TNV,string HNV,string Phai)
+{
+	dsnv.soLuongNV++;
+	strcpy(dsnv.nv[dsnv.soLuongNV].MaNV,MNV.c_str());
+	strcpy(dsnv.nv[dsnv.soLuongNV].Ho,HNV.c_str());
+	strcpy(dsnv.nv[dsnv.soLuongNV].Ten,TNV.c_str());
+	strcpy(dsnv.nv[dsnv.soLuongNV].Phai,Phai.c_str());
+	dsnv.nv[dsnv.soLuongNV].fisrtHD =NULL;
+}
 void nhapNhanVien()
 {
-	string arr[5]={"Ma NV","Ho","Ten","Phai"};
-	vebangThemMoi(arr,4);
+	system("cls");
 	Yescursortype();
-	int i =dsnv.soLuongNV;
-	dsnv.nv[i].MaNV ="";
-	dsnv.nv[i].Ho="";
-	dsnv.nv[i].Ten="";
-	dsnv.nv[i].Phai="";
+	gotoxy(18, 5);
+	cout << char(179);
+	gotoxy(18, 4);
+	cout << char(218);
+	for(int i = 0; i < 66; i++)
+		cout << char(196);
+	cout << char(191);
+	gotoxy(33, 5);
+	cout << char(179);
+	gotoxy(33, 4);
+	cout << char(194);
+	gotoxy(18, 6);
+	cout << char(195);
+	
+	for(int i = 0; i < 66; i++)
+		cout << char(196);
+		for(int i = 1; i < 3; i++)
+		{
+			gotoxy(33 + i*22, 4);
+			cout << char(194);
+			gotoxy(33 + i*22, 5);
+			cout << char(179);
+			gotoxy(33 + i*22, 6);
+			cout << char(197);
+		}
+	gotoxy(33, 6);
+	cout << char(197);
+	gotoxy(85, 5);
+	cout << char(179);
+	gotoxy(85, 6);
+	cout << char(180);
+	int i = 0;
+	textcolor(10);
+	gotoxy(40,2);
+	cout << "THEM NHAN VIEN VAO HE THONG";
+	gotoxy(20, 5);
+	cout << "Ma Nhan Vien";
+	gotoxy(44, 5);
+	cout << "Ho";
+	gotoxy(65, 5);
+	cout << "Ten";
+	gotoxy(79, 5);
+	cout << "Phai";
+	textcolor(7);
+	string MaNV ="";
+	string Ho="";
+	string Ten="";
+	string Phai="";
 	int flag=1;
 	int loop =0;
 	int vitri,key;
-	gotoxy(xMapTh+12,yMapTh+1);
+	int dong=0;
+	int y;
+	int dem =dsnv.soLuongNV;
+	
+	VeNVVT(18, 7);
+	VeNVVT2(18,7);
+	gotoxy(20,7);
 	while(loop ==0)
 	{
 		while(!kbhit())
 		{
+			y = 7+dong*2;
+			
 			if(flag ==1)
 			{	
-				vitri=xMapTh+12+dsnv.nv[i].MaNV.size();
+				vitri=20+MaNV.size();
 			}
 			else if(flag ==2)
 			{	
-				vitri=xMapTh+12+dsnv.nv[i].Ho.size();
+				vitri=35+Ho.size();
 			}
 			else if(flag ==3)
 			{	
-				vitri=xMapTh+12+dsnv.nv[i].Ten.size();
+				vitri=57+Ten.size();
 			}
 			else if(flag ==4)
 			{	
-				vitri=xMapTh+12+dsnv.nv[i].Phai.size();
+				vitri=79+Phai.size();
 			}
 			key = getch();
 			if(key == 27)
 			{
-				loop =1;
-				break;
+				if(veKhungYesNo("       Ban co muon thoat?",0))
+				{
+					system("cls");
+					return;
+				}
+				else
+				{
+					xoaKhungYN();
+					continue;
+				}
 			}
 			else if((key >= 48&& key <=57) || (key >=97 && key <=122) || (key >=65 && key <=90) || key == 32)
 			{
-				if(flag == 1 && dsnv.nv[i].MaNV.size()<10 && key !=32)
+				if(flag == 1 && MaNV.size()<10 && key !=32)
 				{
-					gotoxy(vitri,yMapTh+1);
+					gotoxy(vitri,y);
 					if(key >=97 && key <=122)
 						key = key -32;
 					cout << (char)key;
-					dsnv.nv[i].MaNV.insert(dsnv.nv[i].MaNV.end(),1,(char)key);
+					MaNV.insert(MaNV.end(),1,(char)key);
 				}
-				else if(flag ==2 && dsnv.nv[i].Ho.size() < 20)
+				else if(flag ==2 && Ho.size() < 20)
 				{
-					gotoxy(vitri,yMapTh+3);
-					if((key >=97 && key <=122)&& (vitri-(xMapTh+12) ==0))
+					gotoxy(vitri,y);
+					if((key >=97 && key <=122)&& ((vitri==vitri-Ho.size())))
 						key = key -32;
 					else
 					{
@@ -1864,12 +2046,12 @@ void nhapNhanVien()
 						}
 					}
 					cout << (char)key;
-					dsnv.nv[i].Ho.insert(dsnv.nv[i].Ho.end(),1,(char)key);	
+					Ho.insert(Ho.end(),1,(char)key);	
 				}
-				else if(flag ==3 && dsnv.nv[i].Ten.size() < 20)
+				else if(flag ==3 && Ten.size() < 20)
 				{
-					gotoxy(vitri,yMapTh+5);
-					if((key >=97 && key <=122)&& (vitri-(xMapTh+12) ==0))
+					gotoxy(vitri,y);
+					if((key >=97 && key <=122)&& (vitri==vitri-Ten.size()))
 						key = key -32;
 					else
 					{
@@ -1879,12 +2061,12 @@ void nhapNhanVien()
 						}
 					}
 					cout << (char)key;
-					dsnv.nv[i].Ten.insert(dsnv.nv[i].Ten.end(),1,(char)key);	
+					Ten.insert(Ten.end(),1,(char)key);	
 				}
-				else if(flag ==4 && dsnv.nv[i].Phai.size() < 3)
+				else if(flag ==4 && Phai.size() < 3)
 				{
-					gotoxy(vitri,yMapTh+7);
-					if((key >=97 && key <=122)&& (vitri-(xMapTh+12) ==0))
+					gotoxy(vitri,y);
+					if((key >=97 && key <=122)&& (vitri==vitri-Phai.size()))
 						key = key -32;
 					else
 					{
@@ -1894,138 +2076,179 @@ void nhapNhanVien()
 						}
 					}
 					cout << (char)key;
-					dsnv.nv[i].Phai.insert(dsnv.nv[i].Phai.end(),1,(char)key);
+					Phai.insert(Phai.end(),1,(char)key);
 				}
 			}
 			else if(key ==13||key ==9)
 			{
 				if(flag ==1)
 				{
-					if(dsnv.nv[i].MaNV.size()<10)
+					if(MaNV.size()<10)
 					{
 						while(!kbhit())
 						{
-							Canhbao("Do dai ma nhan vien pham la 10 ki tu",46,3);
+							Canhbao("Do dai ma nhan vien pham la 10 ki tu",30,1);
 						}
 						do{
 							int key1 =getch();
 						}while(key !=13&&key!=27);
-						gotoxy(vitri,xMapTh+1);
+						gotoxy(vitri,y);
 					}
-					else if(Ktra_Trung_MaNV(i)==false)
+					else if(kiemTraTrungMNV(MaNV)==false)
 					{
 						while(!kbhit())
 						{
-							Canhbao("Ma "+string(dsnv.nv[i].MaNV)+" da ton tai.Xin nhap lai!",46,3);
+							Canhbao("Ma "+MaNV+" da ton tai.Xin nhap lai!",30,1);
 						}
 						do{
 							int key1 =getch();
 						}while(key !=13&&key!=27);
-						gotoxy(vitri,xMapTh+1);
+						gotoxy(vitri,y);
 					}
 					else
 					{
-						gotoxy(xMapTh+12,yMapTh+3);
+						gotoxy(35,y);
 						flag =2;
 					}
 				}
 				else if(flag ==2)
 				{
-					if(dsnv.nv[i].Ho.size()==0)
+					if(Ho.size()==0)
 					{
 						while(!kbhit())
 						{
-							Canhbao("Khong duoc de trong.Xin nhap lai!",46,3);
+							Canhbao("Khong duoc de trong.Xin nhap lai!",30,1);
 						}
 						do{
 							int key1 =getch();
 						}while(key !=13&&key!=27);
-						gotoxy(vitri,xMapTh+3);
+						gotoxy(vitri,y);
 					}
 					else
 					{
-						gotoxy(xMapTh+12,yMapTh+5);
+						gotoxy(57,y);
 						flag =3;
 					}
 				}
 				else if(flag ==3)
 				{
-					if(dsnv.nv[i].Ten.size()==0)
+					if(Ten.size()==0)
 					{
 						while(!kbhit())
 						{
-							Canhbao("Khong duoc de trong.Xin nhap lai!",46,3);
+							Canhbao("Khong duoc de trong.Xin nhap lai!",30,1);
 						}
 						do{
 							int key1 =getch();
 						}while(key !=13&&key!=27);
-						gotoxy(vitri,xMapTh+5);
+						gotoxy(vitri,y);
 					}
 					else
 					{
-						gotoxy(xMapTh+12,yMapTh+7);
+						gotoxy(79,y);
 						flag =4;
 					}
 					
 				}
 				else if(flag ==4)
 				{
-					if(dsnv.nv[i].Phai.size()==0)
+					if(Phai.size()==0)
 					{
 						while(!kbhit())
 						{
-							Canhbao("Khong duoc de trong.Xin nhap lai!",46,3);
+							Canhbao("Khong duoc de trong.Xin nhap lai!",30,1);
 						}
 						do{
 							int key1 =getch();
 						}while(key !=13&&key!=27);
-						gotoxy(vitri,xMapTh+7);
+						gotoxy(vitri,y);
 					}
+//					else if(Phai != "Nam" || Phai !="nam"|| Phai !="nu" || Phai !="Nu")
+//					{
+//						while(!kbhit())
+//						{
+//							Canhbao("Nhap sai phai : Nam/Nu.Xin nhap lai!",30,1);
+//						}
+//						do{
+//							int key1 =getch();
+//						}while(key !=13&&key!=27);
+//						gotoxy(vitri,y);
+//					}
 					else
 					{
-						loop=1;
-						int dem =0;
-						for(int m=0;dsnv.nv[m].MaNV!="";m++) // Kiem tra SLNV, neu da nhap du thong tin thi SLNV se dc cap nhat lai sau moi lan nhap
-            				dem++;
-            			dsnv.soLuongNV=dem;
-            			dsnv.nv[i].l.pHead=NULL;
-						break;
+						themNV(MaNV,Ten,Ho,Phai);
+						MaNV ="";
+						Ten ="";
+						Ho ="";
+						Phai= "";
+						dong++;
+						VeNVVT(18, 7+dong*2);
+						VeNVVT2(18,7+dong*2);
+						gotoxy(20,7+dong*2);
+						flag =1;
 					}
 				}
 			}
 			else if(key ==8)
 			{
-				if(flag ==1 && dsnv.nv[i].MaNV.size() > 0)
+				if(flag ==1 && MaNV.size() > 0)
 				{
 					vitri--;
-					gotoxy(vitri,yMapTh+1);
+					gotoxy(vitri,y);
 					cout << " ";
-					gotoxy(vitri,yMapTh+1);
-					dsnv.nv[i].MaNV.erase(dsnv.nv[i].MaNV.end()-1);
+					gotoxy(vitri,y);
+					MaNV.erase(MaNV.end()-1);
 				}
-				else if(flag ==2 && dsnv.nv[i].Ho.size() >0)
+				else if(flag ==2 && Ho.size() >=0)
 				{
-					vitri--;
-					gotoxy(vitri,yMapTh+3);
-					cout << " ";
-					gotoxy(vitri,yMapTh+3);
-					dsnv.nv[i].Ho.erase(dsnv.nv[i].Ho.end()-1);
+					if(vitri==vitri-Ho.size())
+					{
+						gotoxy(12+MaNV.size(),y);
+						flag=1;
+					}
+					else
+					{
+						vitri--;
+						gotoxy(vitri,y);
+						cout << " ";
+						gotoxy(vitri,y);
+						Ho.erase(Ho.end()-1);
+					}
+					
 				}
-				else if(flag ==3&&dsnv.nv[i].Ten.size()>0)
+				else if(flag ==3&&Ten.size()>=0)
 				{
-					vitri--;
-					gotoxy(vitri,yMapTh+5);
-					cout << " ";
-					gotoxy(vitri,yMapTh+5);
-					dsnv.nv[i].Ten.erase(dsnv.nv[i].Ten.end()-1);
+					if(vitri==vitri-Ten.size())
+					{
+						gotoxy(27+MaNV.size(),y);
+						flag=2;
+					}
+					else
+					{
+						vitri--;
+						gotoxy(vitri,y);
+						cout << " ";
+						gotoxy(vitri,y);
+						Ten.erase(Ten.end()-1);
+					}
+					
 				}
-				else if(flag ==4&&dsnv.nv[i].Phai.size()>0)
+				else if(flag ==4&&Phai.size()>=0)
 				{
-					vitri--;
-					gotoxy(vitri,yMapTh+7);
-					cout << " ";
-					gotoxy(vitri,yMapTh+7);
-					dsnv.nv[i].Phai.erase(dsnv.nv[i].Phai.end()-1);
+					if(vitri==vitri-Phai.size())
+					{
+						gotoxy(49+MaNV.size(),y);
+						flag=3;
+					}
+					else
+					{
+						vitri--;
+						gotoxy(vitri,y);
+						cout << " ";
+						gotoxy(vitri,y);
+						Phai.erase(Phai.end()-1);
+					}
+					
 				}
 			}
 			
@@ -2037,19 +2260,19 @@ void nhapNhanVien()
 	}
 }
 	
-void doicho2chuoi(string &a,string &b)
+void doicho2chuoi(char a[31],char b[31])
 {
-	string temp;
-	temp =a;
-	a=b;
-	b=temp;;
+	char temp[31];
+	strcpy(temp,a);
+	strcpy(a,b);
+	strcpy(b,temp);
 }
 void sortTheoTen()
 {
 	string temp1,temp2,temph1,temph2;
-	for(int i =0;i<dsnv.soLuongNV-1;i++)
+	for(int i =0;i<dsnv.soLuongNV;i++)
 	{
-		for(int j =i+1;j<dsnv.soLuongNV;j++)
+		for(int j =i+1;j<dsnv.soLuongNV+1;j++)
 		{
 			temp1 =dsnv.nv[i].Ten;
 			temp2 = dsnv.nv[j].Ten;
@@ -2077,23 +2300,26 @@ void sortTheoTen()
 }
 void xuatNhanVien(NHANVIEN data,int stt)
 {
-	gotoxy(57,3+yMap +stt*2);
+	gotoxy(20,3+yMap +stt*2);
 	cout << data.MaNV;
-	gotoxy(72+1+((28-data.Ten.size())/2),3+yMap +stt*2);
-	cout << data.Ten;
-	gotoxy(100+1+((14-data.Ho.size())/2),3+yMap +stt*2);
+	gotoxy(36+((21-strlen(data.Ho))/2),3+yMap +stt*2);
 	cout << data.Ho;
-	gotoxy(114+1+((20-data.Phai.size())/2),3+yMap +stt*2);
+	gotoxy(57+((26-strlen(data.Ten))/2),3+yMap +stt*2);
+	cout << data.Ten;
+	gotoxy(82+((12-strlen(data.Phai))/2),3+yMap +stt*2);
 	cout << data.Phai;
 }
 void XuatDanhSachNV(int page, int vitri=0)
 {
+	system("cls");
 	Nocursortype();
-	string arr[]={"Ma NV","Ten","Ho","Phai"};
-	veBangChiTiet(arr,"DANH SACH NHAN VIEN",10);
+	string arr[]={"Ma NV","Ho","Ten","Phai"};
+	gotoxy(45,2);
+	cout << "DANH SACH NHAN VIEN";
+	veBangChiTiet(arr,3);
 	sortTheoTen();
 	int k=0;
-	for(int i =page*14;i< ((dsnv.soLuongNV > (page+1)*14)?14 : dsnv.soLuongNV);i++)
+	for(int i =1;i< dsnv.soLuongNV+1;i++)
 	{
 		xuatNhanVien(dsnv.nv[i],k);
 		k++;
@@ -2103,8 +2329,8 @@ void quanLyXuatNV()
 {
 	if(dsnv.soLuongNV==0)
 	{
-		Canhbao("khong co nhan vien nao trong he thong.",46,3);
-		system("PAUSE");
+		veKhungTB("       Khong co nhan vien");
+		system("cls");
 		return;
 	}
 	else
@@ -2141,6 +2367,7 @@ void quanLyXuatNV()
 			}
 			else if (key == 27) // esc
 			{
+				system("cls");
 				return;
 			}
 		}
@@ -2157,30 +2384,34 @@ void TimKiemNV()
 {
 	if(dsnv.soLuongNV==0)
 	{
-		Canhbao("Khong co nhan vien nao trong he thong!!",46,3);
-		system("Pause");
-        return;
+		veKhungTB("       Khong co nhan vien");
+		system("cls");
+		return;
 	}
-	veOTimKiem("Ma Nhan Vien");
+	system("cls");
+	gotoxy(36,2);
+	cout << "Ma Nhan Vien: ";
 	string manv;
 	int loop =1;
 	int key,vitri;
+	int y=2;
 	while(loop ==1)
 	{
 		while(!kbhit())
 		{
-			vitri = xMapTimKiem+23+manv.size();
+			vitri = 50+manv.size();
 			key =getch();
 			if(key ==27)
 			{
 				loop =0;
+				system("cls");
 				break;
 			}
 			else if((key >= 48&& key <=57) || (key >=97 && key <=122) || (key >=65 && key <=90))
 			{
 				if(manv.length()  <10)
 				{
-		 			gotoxy(vitri,yMapTimKiem+1);
+		 			gotoxy(vitri,y);
 					if(key >=97 && key <=122)
 						key = key -32;
 					cout << (char)key;
@@ -2192,49 +2423,53 @@ void TimKiemNV()
 				if(manv.size() <10)
 				{
 					while(!kbhit())
-						Canhbao("Do dai ma nhan vine phai 10 ki tu.Xin kiem tra lai!!",45,3);
+						Canhbao("Do dai ma nhan vine phai 10 ki tu.Xin kiem tra lai!!",30,1);
 					do{
 						int key1 = getch();
 					}while(key!=13);
-					gotoxy(vitri,yMapTimKiem+1);
+					gotoxy(vitri,y);
 				}
-				else
-				{
-					int i;
-					for(i =0;i<dsnv.soLuongNV;i++)
-						if(dsnv.nv[i].MaNV==manv) break;
-						
-					if(i == dsnv.soLuongNV)
+				if(kiemTraTrungMNV(manv))
 					{
 						while(!kbhit())
-							Canhbao("Khong tim thay ma nhan vien "+manv+".Xin kiem tra lai!!",44,3);
+							Canhbao("Khong tim thay ma nhan vien "+manv+".Xin kiem tra lai!!",30,1);
 						do{
 							int key1 = getch();
 						}while(key!=13);
-						gotoxy(vitri,yMapTimKiem+1);
+						gotoxy(vitri,y);
 					}
-					else{
-						string arr[]={"Ma NV","Ho","Ten","Phai"};
-			
-						veBangChiTiet(arr,"THONG TIN CHI TIET NHAN VIEN VUA TIM",12);
-						gotoxy(57,3+yMap);
-						cout << dsnv.nv[i].MaNV;
-						gotoxy(72+1+((28-dsnv.nv[i].Ten.size())/2),3+yMap);
-						cout << dsnv.nv[i].Ten;
-						gotoxy(100+1+((14-dsnv.nv[i].Ho.size())/2),3+yMap);
-						cout << dsnv.nv[i].Ho;
-						gotoxy(114+1+((20-dsnv.nv[i].Phai.size())/2),3+yMap);
-						cout << dsnv.nv[i].Phai;
+				else
+				{
+					int vtr;
+					for(int i =0;i<dsnv.soLuongNV+1;i++)
+					{
+						if(dsnv.nv[i].MaNV==manv) 
+						{
+							vtr=i;
+							break;
+						}
 					}
+					veHTSearch("Ma Nhan Vien","Ho","Ten","Phai");
+					VeNVVT(18,7);
+					VeNVVT2(18,7);
+					gotoxy(20,7);
+					cout << dsnv.nv[vtr].MaNV;
+					gotoxy(36+((18-strlen(dsnv.nv[vtr].Ho))/2),7);
+					cout << dsnv.nv[vtr].Ho;
+					gotoxy(58+((18-strlen(dsnv.nv[vtr].Ten))/2),7);
+					cout << dsnv.nv[vtr].Ten;
+					gotoxy(79+((6-strlen(dsnv.nv[vtr].Phai))/2),7);
+					cout << dsnv.nv[vtr].Phai;
+						
 					
 				}
 			}
 			else if(key == 8 && manv.length() >0)
 			{
 				vitri--;
-				gotoxy(vitri,yMapTimKiem+1);
+				gotoxy(vitri,y);
 				cout << " ";
-				gotoxy(vitri,yMapTimKiem+1);
+				gotoxy(vitri,y);
 				manv.erase(manv.end()-1);
 			}
 		}
@@ -2253,23 +2488,27 @@ void XoaNhanVien()
 {
 	if(dsnv.soLuongNV==0)
 	{
-		Canhbao("Khong co nhan vien nao trong he thong!!",46,3);
-		system("Pause");
-        return;
+		veKhungTB("       Khong co nhan vien");
+		system("cls");
+		return;
 	}
+	system("cls");
 	Yescursortype();
-veOTimKiem("Ma Nhan Vien");
+	gotoxy(36,2);
+	cout << "Ma Nhan Vien: ";
 	string manv;
 	int loop =1;
 	int key,vitri;
+	int y=2;
 	while(loop ==1)
 	{
 		while(!kbhit())
 		{
-			vitri = xMapTimKiem+23+manv.size();
+			vitri = 50+manv.size();
 			key =getch();
 			if(key ==27)
 			{
+				system("cls");
 				loop =0;
 				break;
 			}
@@ -2277,7 +2516,7 @@ veOTimKiem("Ma Nhan Vien");
 			{
 				if(manv.length()  <10)
 				{
-		 			gotoxy(vitri,yMapTimKiem+1);
+		 			gotoxy(vitri,y);
 					if(key >=97 && key <=122)
 						key = key -32;
 					cout << (char)key;
@@ -2289,45 +2528,76 @@ veOTimKiem("Ma Nhan Vien");
 				if(manv.size() <10)
 				{
 					while(!kbhit())
-						Canhbao("Do dai ma nhan vine phai 10 ki tu.Xin kiem tra lai!!",45,3);
+						Canhbao("Do dai ma nhan vine phai 10 ki tu.Xin kiem tra lai!!",30,1);
 					do{
 						int key1 = getch();
 					}while(key!=13);
-					gotoxy(vitri,yMapTimKiem+1);
+					gotoxy(vitri,y);
 				}
-				else
+				if(kiemTraTrungMNV(manv)==true)
 				{
-					int i;
-					for(i =0;i<dsnv.soLuongNV;i++)
-						if(dsnv.nv[i].MaNV==manv) break;
-						
-					if(i == dsnv.soLuongNV)
-					{
 						while(!kbhit())
-							Canhbao("Khong tim thay ma nhan vien "+manv+".Xin kiem tra lai!!",44,3);
+							Canhbao("Khong tim thay ma nhan vien "+manv+".Xin kiem tra lai!!",30,1);
 						do{
 							int key1 = getch();
 						}while(key!=13);
-						gotoxy(vitri,yMapTimKiem+1);
-					}
-					else{
-						deleteNV(i);
-						while(!kbhit())
-							Canhbao("Xoa thanh cong ma nhan vien "+manv+"!!",46,3);
-						do{
-							int key1 = getch();
-						}while(key!=13);
-						gotoxy(vitri,yMapTimKiem+1);
-					}
-					
+						gotoxy(vitri,y);
 				}
+					int vtr;
+					for(int i =0;i<dsnv.soLuongNV+1;i++)
+					{
+						if(dsnv.nv[i].MaNV==manv)
+						{
+							vtr=i;
+							 break;
+						 } 
+					}
+					veHTSearch("Ma Nhan Vien","Ho","Ten","Phai");
+					VeNVVT(18,7);
+					VeNVVT2(18,7);
+					gotoxy(20,7);
+					cout << dsnv.nv[vtr].MaNV;
+					gotoxy(36+((18-strlen(dsnv.nv[vtr].Ho))/2),7);
+					cout << dsnv.nv[vtr].Ho;
+					gotoxy(58+((18-strlen(dsnv.nv[vtr].Ten))/2),7);
+					cout << dsnv.nv[vtr].Ten;
+					gotoxy(79+((6-strlen(dsnv.nv[vtr].Phai))/2),7);
+					cout << dsnv.nv[vtr].Phai;
+					if(veKhungYesNo("     Ban co muon xoa khong?",0))
+					{
+						deleteNV(vtr);
+						system("cls");
+						veKhungTB(" Xoa thanh cong "+manv+"");
+						system("cls");
+						return;
+					}
+					else
+					{
+						system("cls");
+						gotoxy(36,2);
+						cout << "Ma Nhan Vien: "+manv+"";
+						veHTSearch("Ma Nhan Vien","Ho","Ten","Phai");
+						VeNVVT(18,7);
+						VeNVVT2(18,7);
+						gotoxy(20,7);
+						cout << dsnv.nv[vtr].MaNV;
+						gotoxy(36+((18-strlen(dsnv.nv[vtr].Ho))/2),7);
+						cout << dsnv.nv[vtr].Ho;
+						gotoxy(58+((18-strlen(dsnv.nv[vtr].Ten))/2),7);
+						cout << dsnv.nv[vtr].Ten;
+						gotoxy(79+((6-strlen(dsnv.nv[vtr].Phai))/2),7);
+						cout << dsnv.nv[vtr].Phai;
+						veKhungTB("       Da huy xoa "+manv+"");
+						system("cls");
+						return;
+					}
 			}
 			else if(key == 8 && manv.length() >0)
 			{
 				vitri--;
-				gotoxy(vitri,yMapTimKiem+1);
+				gotoxy(vitri,y);
 				cout << " ";
-				gotoxy(vitri,yMapTimKiem+1);
+				gotoxy(vitri,y);
 				manv.erase(manv.end()-1);
 			}
 		}
@@ -2344,319 +2614,638 @@ void ghiNhanVien()
 }
 void docNhanVien()
 {
-	ifstream ifs("NHANVIEN",ios::in);
-	while((getline(ifs,dsnv.nv[dsnv.soLuongNV].MaNV))!=false)
-	{
-		fflush(stdin);
-		getline(ifs,dsnv.nv[dsnv.soLuongNV].Ho);
-		getline(ifs,dsnv.nv[dsnv.soLuongNV].Ten);
-		getline(ifs,dsnv.nv[dsnv.soLuongNV].Phai);
-		int flag=0;
-		for(int i=0;i<dsnv.soLuongNV;i++)
-			if(dsnv.nv[i].MaNV== dsnv.nv[dsnv.soLuongNV].MaNV)
-			{
-				flag=1;
-				break;
-			}
-		if(flag==0)
-			dsnv.soLuongNV++;
-	}
-	ifs.close();
+//	ifstream ifs("NHANVIEN",ios::in);
+//	while((getline(ifs,dsnv.nv[dsnv.soLuongNV].MaNV))!=false)
+//	{
+//		fflush(stdin);
+//		getline(ifs,dsnv.nv[dsnv.soLuongNV].Ho);
+//		getline(ifs,dsnv.nv[dsnv.soLuongNV].Ten);
+//		getline(ifs,dsnv.nv[dsnv.soLuongNV].Phai);
+//		int flag=0;
+//		for(int i=0;i<dsnv.soLuongNV;i++)
+//			if(dsnv.nv[i].MaNV== dsnv.nv[dsnv.soLuongNV].MaNV)
+//			{
+//				flag=1;
+//				break;
+//			}
+//		if(flag==0)
+//			dsnv.soLuongNV++;
+//	}
+//	ifs.close();
 }
 								// END
 								// BAT DAU CHI TIET HOA DON
-
-void InitCT_HD(DSCT &l)
+NODECT_HOADON* GetNodeCT(CT_HOADON data)
 {
-	l.pHead = l.pTail =NULL;
-}
-NODECT_HOADON* GetNode(CT_HOADON data)
-{
+	
 	NODECT_HOADON* p = new NODECT_HOADON;
-	if(p == NULL)
-		return NULL;
-	p->Data = data;
 	p->pNext = NULL;
+	p->Data = data;
 	return p;
 }
-void AddTailCT(DSCT&l, NODECT_HOADON* p)
+NODECT_HOADON *AddTailCT(NODECT_HOADON *dsct,NODECT_HOADON* p)
 {
-	if(l.pHead == NULL)
-	 	l.pHead = l.pTail =NULL;
+	if(dsct == NULL)
+	{
+		p->pNext = NULL;
+		return p;
+	}
 	else
 	{
-		l.pTail->pNext = p;
-		l.pTail = p;
-	}	
+		dsct->pNext = AddTailCT(dsct->pNext, p);
+	}
 }
-void NhapCT_HD(Tree&vt, CT_HOADON &hd, string loai)
+void NhapCT_HDNhap(NODE_HOADON *q)
 { 
-	
-	int cot1 = 47, cot2=52,cot3=70,cot4=92,cot5=102,cot6=112, cot7=132,y =16;
-	int vitri;
-	string MaVT;
-	long dongia;
-	int soluong;
-	long vat;
-	int i =0,flag =1;
-	int key;
-	LNR(vt);
-	NODE_VATTU* node;
-	while(true)
+	int vitri,key;
+	string maVT,sl,VAT,dongia;
+	int sls,dg;
+	double vat;
+	int y;
+	int flag =1;
+	int exit =0;
+	int dong =0;
+	int vtr;
+	string mangKiemtra[MAXTK];
+	int nArr =0;
+	NODE_VATTU *p;
+	gotoxy(12,8);
+	while(exit ==0)
 	{
-		if(kbhit())
+		while(!kbhit())
 		{
-			key = getch();
-			if(key == 27) return;
-		}
-		if(flag ==1)
-		{
-			i++; // tang so thu tu
-			gotoxy(cot1,y);
-			cout << i;
-			gotoxy(cot2,y);
-			flag =2;
-		}
-		while(flag ==2)
-		{
-		while(kbhit())
-		{
-			vitri = cot2 + MaVT.size();
-			key = getch();
-			if(key == 27)
+			key =getch();
+			if(flag ==1)
 			{
-				return;
+				vitri =12+maVT.size();
 			}
-			else if(key == 13 || key==9)
+			else if(flag ==2)
 			{
-				if(kiemTraDoDaiMaVT(MaVT)==false)
+				vitri=50+sl.size();
+			}
+			else if(flag ==3)
+			{
+				vitri = 67+dongia.size();
+			}
+			else if(flag ==4)
+			{
+				vitri =88+VAT.size();
+			}
+			
+			y=8+dong*2;
+			if(key ==0)
+			{
+				key =getch();
+			}
+			else if(key ==27)
+			{
+				if(veKhungYesNo("       Ban co muon thoat?",0))
 				{
-					while(!kbhit())
-						Canhbao("Do dai ma vat tu la 10 ki tu!. Xin nhap lai!!",46,3);
-					do
+					if(q->data.fisrtCT == NULL)
 					{
-						int key1 = getch();
-						
-					}while(key!=13&&key!=27);
-					gotoxy(vitri,y);
+						delete q;
+					}
+					system("cls");
+					return;
 				}
-				else if(kiemTraTrungMaVT(MaVT) == false)
+				else
 				{
-					while(!kbhit())
-						Canhbao("Ma vat tu "+MaVT+" khong ton tai. Xin nhap lai!",46,3);
-					do
-					{
-						int key1= getch();
-					}while(key !=13&& key !=9);
-					gotoxy(vitri,y);
-				}
-				else if(kiemTraTrungMaVT(MaVT)==true)
-				{
-					node =Search(vt,MaVT);
-					gotoxy(cot3,y);
-					cout << node->Data.TenVT;
-					gotoxy(cot4,y);
-					cout << node->Data.DVT;
-					flag = 5;
-					break;
+					xoaKhungYN();
+					continue;
 				}
 			}
-			// nhap ma vat tu
-			else if((key >=48 && key <=57) || (key >=97 && key <=122) || (key  >=65 && key <= 90))
+			else if((key >= 48&& key <=57) || (key >=97 && key <=122) || (key >=65 && key <=90))
 			{
-				if(MaVT.size() <10) // vi tri - cot2 <10;
+				if(flag ==1&&maVT.size() <10)
 				{
 					gotoxy(vitri,y);
 					if(key >=97 && key <=122)
 						key = key -32;
+					cout << (char)key;
+					maVT.insert(maVT.end(),1,char(key));
+				}
+				else if(flag == 2&&(key >= 48&& key <=57) &&sl.size()<3)
+				{
+					gotoxy(vitri,y);
 					cout << char(key);
-					MaVT.insert(MaVT.end(),1,char(key));
+					sl.insert(sl.end(),1,char(key));
+					sls = atoi(sl.c_str());
+				}
+				else if(flag == 3&&(key >= 48&& key <=57)&&dongia.size()<10)
+				{
+					gotoxy(vitri,y);
+					cout << (char)key;
+					dongia.insert(dongia.end(),1,char(key));
+					dg = atoi(dongia.c_str());
+				}
+				else if(flag == 4&&(key >= 48&& key <=57))
+				{
+					gotoxy(vitri,y);
+					cout << (char)key;
+					VAT.insert(VAT.end(),1,char(key));
+					vat = atoi(VAT.c_str());
+				}
+			}
+			else if(key == 13||key ==9)
+			{
+				 if(flag ==1)
+				{
+					if(kiemTraTrungMaVT(t,maVT) == NULL)
+					{
+						while(!kbhit())
+						{
+							Canhbao("Ma vat tu khong ton tai.Xin nhap lai!!",34,1);
+						}
+						do{
+							int key1 = getch();
+						}while(key!=13&&key!=9);
+						gotoxy(vitri,y);
+					}
+					else if(maVT.size() ==0)
+					{
+						while(!kbhit())
+						{
+							Canhbao("Chua nhap ma vat tu",40,1);
+						}
+						do
+						{
+							int key1 =getch();
+						}while(key!=13||key!=9);
+						gotoxy(vitri,y);
+					}
+					else
+					{
+						bool ktrtrung = false;
+						for(int j =0; j <nArr+1;j++)
+						{
+							if(mangKiemtra[j]==maVT)
+							{
+								ktrtrung = true;
+								break;
+							}
+						}
+						if(ktrtrung == true)
+						{
+							while(!kbhit())
+								{
+									Canhbao("Trong mot hoa don khong duoc nhap trung vat tu.Xin nhap lai!!",34,1);
+								}
+								do{
+									int key1 = getch();
+								}while(key!=13&&key!=9);
+								gotoxy(12+maVT.size(),y);
+						}
+						else
+						{
+							p = Search(t,maVT);
+							gotoxy(27,y);
+							cout << p->Data.TenVT;
+							gotoxy(50,y);
+							flag=2;
+						}
+						
+					}
+				}
+				else if(flag ==2)
+				{
+					if(sl.size() == 0)
+					{
+						while(!kbhit())
+						{
+							Canhbao("Chua nhap so luong cho hoa don",40,1);
+						}
+						do
+						{
+							int key1 =getch();
+						}while(key!=13||key!=9);
+						gotoxy(vitri,y);
+					}
+					else
+					{
+						gotoxy(67,y);
+						flag=3;
+					}
+				}
+				else if(flag==3)
+				{
+					if(dongia.size()==0)
+					{
+						while(!kbhit())
+						{
+							Canhbao("Chua nhap so luong cho hoa don",40,1);
+						}
+						do
+						{
+							int key1 =getch();
+						}while(key!=13||key!=9);
+						gotoxy(vitri,y);	
+					}
+					else
+					{
+						gotoxy(88,y);
+						flag=4;
+					}
+				}
+				else if(flag ==4)
+				{
+					int tong=0;
+					if(VAT.size()==0)
+					{
+						vat=0;
+						p->Data.SoLuongTon+=sls;
+						CT_HOADON cthd;
+						if(nArr < MAXTK)
+						{
+							mangKiemtra[nArr++] = maVT;
+						}
+						strcpy(cthd.MaVT,maVT.c_str());
+						cthd.soluong = sls;
+						cthd.dongia = dg;
+						cthd.VAT =vat;
+						tong+=sls*dg+(vat/100)*dg;
+						q->data.fisrtCT=AddTailCT(q->data.fisrtCT,GetNodeCT(cthd));
+						sl="";
+						maVT="";
+						dongia ="";
+						VAT="";
+						dong++;
+						xoakhungtongtien(12+(dong-1)*2);
+						veKhungTongGiaTien(12+dong*2);
+						textcolor(10);
+						gotoxy(55,13+dong*2);
+						cout << tong << "  VND";
+						textcolor(7);
+						Ve1(10,8+dong*2);
+						Ve2(10,8+dong*2);
+					}
+					else
+					{
+						p->Data.SoLuongTon+=sls;
+						CT_HOADON cthd;
+						strcpy(cthd.MaVT,maVT.c_str());
+						cthd.soluong = sls;
+						cthd.dongia = dg;
+						cthd.VAT =vat;
+						if(nArr < MAXTK)
+						{
+							mangKiemtra[nArr++] = maVT;
+						}
+						tong+=sls*dg+(vat/100)*dg;
+						q->data.fisrtCT=AddTailCT(q->data.fisrtCT,GetNodeCT(cthd));
+						sl="";
+						maVT="";
+						dongia ="";
+						VAT="";
+						dong++;
+						xoakhungtongtien(12+(dong-1)*2);
+						veKhungTongGiaTien(12+dong*2);
+						textcolor(10);
+						gotoxy(55,13+dong*2);
+						cout << tong << "  VND";
+						textcolor(7);
+						Ve1(10,8+dong*2);
+						Ve2(10,8+dong*2);
+						gotoxy(12,8+dong*2);
+						flag=1;
+					}
 				}
 			}
 			else if(key ==8)
 			{
-				if(MaVT.size() >0)
+				if(flag==1 && maVT.size() >0)
 				{
 					vitri--;
 					gotoxy(vitri,y);
-					cout << " ";
+					cout <<" ";
 					gotoxy(vitri,y);
-					MaVT.erase(MaVT.end()-1);
+					maVT.erase(maVT.end()-1);
 				}
-			}
-			
-			}
-		}	
-		if(flag == 5) // nhap so luong
-		{
-			char so[5]; // su dung mang de de kiem tra tung chu so nhap vao
-		NhapLaiSoLuong:
-			gotoxy(cot5+1,y);
-			cin >> so;
-			if(chiChoNhapSo(so))
-			{
-				soluong = atoi(so);
-			}
-			else
-			{
-				gotoxy(cot5,y);
-				cout << "          ";
-				Canhbao("Nhap sai so luong.Xin nhap lai!",46,3);
-				getch();
-				goto NhapLaiSoLuong;
-			}
-			if(node !=NULL)
-			{
-				if(loai == "N")
+				else if(flag ==2 && sl.size() >=0)
 				{
-						node->Data.SoLuongTon +=soluong;
-				}
-				else if(loai == "X")
-				{
-					if(soluong <= node->Data.SoLuongTon)
+					if(sl.size()==0)
 					{
-						node->Data.SoLuongTon -= soluong;
+						gotoxy(27,y);
+						cout << "           ";
+						gotoxy(12+maVT.size(),y);
+						flag=1;
 					}
 					else
 					{
-						Canhbao("So luong trong kho khong du  (Trong kho con "+to_String(node->Data.SoLuongTon)+"). Xin Nhap lai!!",46,3);
-						getch();
-						textcolor(7);
-						gotoxy(cot5,y);
-						cout << "          ";
-						goto NhapLaiSoLuong;
+						vitri--;
+						gotoxy(vitri,y);
+						cout <<" ";
+						gotoxy(vitri,y);
+						sl.erase(sl.end()-1);
+						sls =atoi(sl.c_str());
 					}
-				}				
-			}
-			flag =6;
-		}
-		else if(flag ==6) // nhap don gia
-		{
-			gotoxy(cot6,y);
-			if(loai == "N") //neu la hoa don nhap
-			{
-				char gia[10];
-			NhapLaiGia:
-				gotoxy(cot6,y);
-				cin >>gia;
-				if(chiChoNhapSo(gia))
+				}
+				else if(flag ==3 && dongia.size() >=0)
 				{
-					dongia = atoi(gia);
+					if(dongia.size() ==0)
+					{
+						gotoxy(50+sl.size(),y);
+						flag=2;
+					}
+					else
+					{
+						vitri--;
+						gotoxy(vitri,y);
+						cout <<" ";
+						gotoxy(vitri,y);
+						dongia.erase(dongia.end()-1);
+						dg=atoi(dongia.c_str());
+					}
+				}
+				else if(flag ==4 && VAT.size()>=0)
+				{
+					if(VAT.size()==0)
+					{
+						gotoxy(67+dongia.size(),y);
+						flag=3;
+					}
+					else
+					{
+						vitri--;
+						gotoxy(vitri,y);
+						cout <<" ";
+						gotoxy(vitri,y);
+						VAT.erase(VAT.end()-1);
+						vat=atoi(VAT.c_str());
+					}
+				}
+			}
+		}
+	}
+}
+int timdongianhap(string mavt);
+void NhapCT_HDXuat(NODE_HOADON *q)
+{ 
+	int vitri,key;
+	string maVT="",sl="",dongia="";
+	int sls,vat,dg;
+	int y;
+	int flag =1;
+	int exit =0;
+	int dong =0;
+	int vtr;
+	NODE_VATTU *p;
+	int gianhap;
+	NODECT_HOADON *k;
+	gotoxy(12,8);
+	while(exit ==0)
+	{
+		while(!kbhit())
+		{
+			
+			if(flag ==1)
+			{
+				vitri =12+maVT.size();
+			}
+			else if(flag ==2)
+			{
+				vitri=50+sl.size();
+			}
+			else if(flag ==3)
+			{
+				vitri = 67+dongia.size();
+			}
+			y=8+dong*2;
+			key =getch();
+			if(key ==0)
+			{
+				key =getch();
+			}
+			else if(key ==27)
+			{
+				if(veKhungYesNo("       Ban co muon thoat?",0))
+				{
+					if(q->data.fisrtCT == NULL)
+					{
+						delete q;
+					}
+					system("cls");
+					return;
 				}
 				else
 				{
-					gotoxy(cot6,y);
-					cout <<"            ";
-					Canhbao("Don gia chi nhan ki tu so.Xin nhap lai!",46,3);
-					getch();
-					goto NhapLaiGia;
+					xoaKhungYN();
+					continue;
 				}
 			}
-			else if(loai =="X")
+			else if((key >= 48&& key <=57) || (key >=97 && key <=122) || (key >=65 && key <=90))
 			{
-				NODE_HOADON *p;
-				DSHD ds;
-				int dem =0;
-				for(p = ds.pHead; p!=NULL;p = p->pNext);
+				if(flag ==1&&maVT.size() <10)
 				{
-					if(p->data.loai == "N") // Tim den cac hoa don nhap
+					gotoxy(vitri,y);
+					if(key >=97 && key <=122)
+						key = key -32;
+					cout << (char)key;
+					maVT.insert(maVT.end(),1,char(key));
+				}
+				else if(flag == 2&&(key >= 48&& key <=57))
+				{
+					gotoxy(vitri,y);
+					cout << (char)key;
+					sl.insert(sl.end(),1,char(key));
+					sls = atoi(sl.c_str());
+				}
+				else if(flag == 3&&(key >= 48&& key <=57))
+				{
+					gotoxy(vitri,y);
+					cout << (char)key;
+					dongia.insert(dongia.end(),1,char(key));
+					dg = atoi(dongia.c_str());
+				}
+			}
+			else if(key == 13||key ==9)
+			{
+				 if(flag ==1)
+				{
+					if(kiemTraTrungMaVT(t,maVT) == NULL)
 					{
-						for(NODECT_HOADON *q = q->pNext;q!=NULL;q=q->pNext) // tim vat trong hoa don nhap
+						while(!kbhit())
 						{
-							if(q->Data.MaVT==MaVT)
-							{
-								dongia = soluong*q->Data.dongia;
-								cout << dongia;
-								dem++;
-								break;
-							}
-							if(dem!=0) break; // neu khong co thi thoat vong lap
+							Canhbao("Ma vat tu khong ton tai.Xin nhap lai!!",34,1);
 						}
+						do{
+							int key1 = getch();
+						}while(key!=13&&key!=9);
+						gotoxy(vitri,y);
+					}
+					else if(maVT.size() ==0)
+					{
+						while(!kbhit())
+						{
+							Canhbao("Khong duoc de trong.Xin nhap lai!!",34,1);
+						}
+						do{
+							int key1 = getch();
+						}while(key!=13&&key!=9);
+						gotoxy(vitri,y);
+					}
+					else
+					{
+						// bi loi tim kiem
+				//		gianhap = timdongianhap(maVT);
+						p = Search(t,maVT);
+						gotoxy(27,y);
+						cout << p->Data.TenVT;
+						gotoxy(50,y);
+						flag=2;
+					}
+				}
+				else if(flag ==2)
+				{
+					if(sl.size() ==0)
+					{
+						while(!kbhit())
+						{
+							Canhbao("Khong duoc de trong.Xin nhap lai!!",34,1);
+						}
+						do{
+							int key1 = getch();
+						}while(key!=13&&key!=9);
+						gotoxy(vitri,y);
+					}
+					else if(p->Data.SoLuongTon < sls)
+					{
+						while(!kbhit())
+						{
+							Canhbao("So luong trong kho khong du de xuat < "+to_String(p->Data.SoLuongTon)+" >",34,1);
+						}
+						do{
+							int key1 = getch();
+						}while(key!=13&&key!=9);
+						gotoxy(vitri,y);
+					}
+					else
+					{
+						gotoxy(67,y);
+						flag=3;
+					}
+				}
+				else if(flag==3)
+				{   
+					if(dongia.size()==0)
+					{
+						while(!kbhit())
+						{
+							Canhbao("Chua nhap so luong cho hoa don",40,1);
+						}
+						do{
+							int key1 = getch();
+						}while(key!=13&&key!=9);
+						gotoxy(vitri,y);	
+					}
+					
+//					else if(gianhap > dg)
+//					{
+//						while(!kbhit())
+//						{
+//							Canhbao("Gia xuat phai lon hon gia nhap < "+to_String(gianhap)+" >",40,1);
+//						}
+//						do{
+//							int key1 = getch();
+//						}while(key!=13&&key!=9);
+//						gotoxy(vitri,y);
+//					}
+					else
+					{
+						int tong =0;
+						vat =k->Data.VAT;
+						gotoxy(90,y);
+						cout << vat;
+						p->Data.SoLuongTon-=sls;
+						CT_HOADON cthd;
+						strcpy(cthd.MaVT,maVT.c_str());
+						cthd.soluong = sls;
+						cthd.dongia = dg;
+						cthd.VAT =vat;
+						tong+=sls*dg+(vat/100)*dg;
+						q->data.fisrtCT=AddTailCT(q->data.fisrtCT,GetNodeCT(cthd));
+						sl="";
+						maVT="";
+						dongia ="";
+						dong++;
+						xoakhungtongtien(12+(dong-1)*2);
+						veKhungTongGiaTien(12+dong*2);
+						textcolor(10);
+						gotoxy(55,13+dong*2);
+						cout << tong << "  VND";
+						textcolor(7);
+						Ve1(10,8+dong*2);
+						Ve2(10,8+dong*2);
+						gotoxy(12,8+dong*2);
+						flag=1;
+					}
+				}
+				
+			}
+			else if(key ==8)
+			{
+				if(flag==1 && maVT.size() >0)
+				{
+					vitri--;
+					gotoxy(vitri,y);
+					cout <<" ";
+					gotoxy(vitri,y);
+					maVT.erase(maVT.end()-1);
+				}
+				else if(flag ==2 && sl.size() >=0)
+				{
+					if(sl.size()==0)
+					{
+						gotoxy(12+maVT.size(),y);
+						flag=1;
+						gotoxy(27,y);
+						cout << "           ";
+						
+					}
+					else
+					{
+						vitri--;
+						gotoxy(vitri,y);
+						cout <<" ";
+						gotoxy(vitri,y);
+						sl.erase(sl.end()-1);
+						sls =atoi(sl.c_str());
+					}
+				}
+				else if(flag ==3 && dongia.size() >=0)
+				{
+					if(dongia.size()==0)
+					{
+						gotoxy(50+sl.size(),y);
+						flag=2;
+					}
+					else
+					{
+						vitri--;
+						gotoxy(vitri,y);
+						cout <<" ";
+						gotoxy(vitri,y);
+						dongia.erase(dongia.end()-1);
+						dg=atoi(dongia.c_str());
 					}
 				}
 			}
-			flag =7;
-		}
-		else if(flag ==7)
-		{
-			char so[3]; // su dung mang de de kiem tra tung chu so nhap vao
-		NhapLaiVAT:
-			gotoxy(cot7,y);
-			cin >> so;
-			if(chiChoNhapSo(so))
-			{
-				vat = atoi(so);
-			}
-			else if(!chiChoNhapSo(so))
-			{
-				gotoxy(cot7,y);
-				cout << "     ";
-				Canhbao("Nhap sai VAT.Xin nhap lai!",46,3);
-				getch();
-				goto NhapLaiVAT;
-			}
-			else if(vat <0 || vat > 100)
-			{
-				gotoxy(cot7,y);
-				cout << "    ";
-				Canhbao("Nhap sai VAT.Xin nhap lai!",46,3);
-				getch();
-				goto NhapLaiVAT;
-			}
-			else
-			{
-				flag =1;
-				strcpy(hd.MaVT,MaVT.c_str());
-				hd.soluong = soluong;
-				hd.dongia = dongia;
-				hd.VAT = vat;
-				y++; 
-				MaVT =""; 
-			}
-								
 		}
 	}
 }
-void ThemCT_HoaDon(Tree &vt,DSCT &l,string loai)
+void xuatCT_HD(CT_HOADON data,int stt)
 {
-	CT_HOADON hd;
-	veBangNhapCT_HD();
-	NhapCT_HD(vt,hd,loai);
-	AddTailCT(l,GetNode(hd));
-}
-void XuatCT_HD(CT_HOADON data,int stt)
-{
-	gotoxy(57,3+yMap +stt*2);
+	gotoxy(20,3+yMap +stt*2);
 	cout << data.MaVT;
-	gotoxy(72+1+((28-to_String(data.dongia).size())/2),3+yMap +stt*2);
-	cout << data.dongia;
-	gotoxy(100+1+((14-to_String(data.soluong).size())/2),3+yMap +stt*2);
+	gotoxy(36+((21-to_String(data.soluong).size())/2),3+yMap +stt*2);
 	cout << data.soluong;
-	gotoxy(114+1+((20-to_String(data.VAT).size())/2),3+yMap +stt*2);
+	gotoxy(57+((26-to_String(data.dongia).size())/2),3+yMap +stt*2);
+	cout << data.dongia;
+	gotoxy(74+((26-to_String(data.VAT).size())/2),3+yMap +stt*2);
 	cout << data.VAT;
-}
-void XuatDanhSachCT_HD(DSCT &l,int page,int vitri=0)
-{
-	string arr[]={"Ma VT", "Don gia","So luong","%VAT"};
-	veBangChiTiet(arr,"DANH SACH CHI TIEN HOA DON",10);
-	int stt =0;
-	int dem =0;
-	for(NODECT_HOADON *p=l.pHead;p!=NULL;p=p->pNext)
-	{
-		if(dem >= page*14 && dem < (page+1)*14)
-		{
-			XuatCT_HD(p->Data,stt);
-			stt++;
-		}
-		dem++;
-	}
 }
 								// KET THUC CHI TIET HOA DON
 								// BAT DAU HOA DON
-void InitHD(DSHD &l)
-{
-	l.pHead = l.pTail =NULL;
-}
+NODE_HOADON * pHead =NULL;NODE_HOADON *pTail=NULL;
 NODE_HOADON* Getnode(HOADON data)
 {
 	NODE_HOADON* p = new NODE_HOADON;
@@ -2664,38 +3253,56 @@ NODE_HOADON* Getnode(HOADON data)
 		return NULL;
 	p->data = data;
 	p->pNext = NULL;
+   
 	return p;
 }
-void AddTailHD(DSHD &l, NODE_HOADON* p)
+void AddTailHD(NODE_HOADON* p)
 {
-	if(l.pHead ==NULL)
-		l.pHead = l.pTail = p;
+	if(pHead ==NULL)
+		pHead=pTail=p;
 	else
 	{
-		l.pTail->pNext = p;
-		l.pTail =p;
+		pTail->pNext = p;
+		pTail = p;
+		p->pNext = NULL;
 	}
 }
-NODE_HOADON* SearchHD(DSHD l, string soHD)
+NODE_HOADON *ThemDSHDNV(NODE_HOADON *dshd,NODE_HOADON *p)
 {
-	NODE_HOADON *p;
-	for(p=l.pHead;p!=NULL;p=p->pNext)
+	if(dshd == NULL)
 	{
-		if(strcmp(p->data.SoHD,soHD.c_str())==0)
+		p->pNext = NULL;
+		return p;
+	}
+	else
+		dshd->pNext = ThemDSHDNV(dshd->pNext, p);
+}
+NODE_HOADON* SearchHD(string soHD)
+{
+	NODE_HOADON *q;
+	for(int i = 0; i < dsnv.soLuongNV+1; i++)
+	{
+		NODE_HOADON *p = dsnv.nv[i].fisrtHD;
+		while(p != NULL)
 		{
-			return p;
+			if(strcmp(p->data.SoHD, soHD.c_str()) == 0)
+			{
+				q = p;
+				return q;
+			}
+			p = p->pNext;
 		}
 	}
 	return NULL;
 }
-void nhapNgayHD(Date &date)
+void nhapNgayHD(Date &date,int &exit)
 {
 	string sngay=to_String(date.ngay) ;
 	string sthang=to_String(date.thang);
 	string snam =to_String(date.nam);
 	int key, check =0,vitri;
 	int flag =3;
-	int y =yMapTh-4;
+	int y =3;
 	while(check ==0)
 	{
 		while(!kbhit())
@@ -2703,19 +3310,20 @@ void nhapNgayHD(Date &date)
 			key = getch();
 			if(flag==1)
 			{
-				vitri = xMapTh+13+sngay.length();
+				vitri = 47+sngay.length();
 			}
 			else if(flag==2)
 			{
-				vitri = xMapTh+18+sthang.length();
+				vitri = 56+sthang.length();
 			}
 			else if(flag==3)
 			{
-				vitri = xMapTh+23+snam.length();
+				vitri = 63+snam.length();
 			}
 			if(key ==27)
 			{
-				check =2;
+				check=2;
+				exit =1;
 				break;
 			}
 			else if(key >= 48 && key <=57)
@@ -2749,7 +3357,7 @@ void nhapNgayHD(Date &date)
 					if(date.ngay < 0 || date.ngay > 31)
 					{
 						while(!kbhit())
-						 Canhbao("Nhap sai ngay.Xin nhap lai!",46,3);
+						 Canhbao("Nhap sai ngay.Xin nhap lai!",30,1);
 						do
 						{
 							int key1 = getch();
@@ -2761,7 +3369,7 @@ void nhapNgayHD(Date &date)
 					{
 						
 						while(!kbhit())
-						 Canhbao("Khong duoc de trong.Xin nhap lai!",46,3);
+						 Canhbao("Khong duoc de trong.Xin nhap lai!",30,1);
 						do
 						{
 							int key1 = getch();
@@ -2770,7 +3378,7 @@ void nhapNgayHD(Date &date)
 					}
 					else{
 						
-						gotoxy(xMapTh+18+sthang.length(),y);
+						gotoxy(56+sthang.length(),y);
 						flag =2;
 					}
 				}
@@ -2780,7 +3388,7 @@ void nhapNgayHD(Date &date)
 					{
 						
 						while(!kbhit())
-						 Canhbao("Nhap sai thang.Xin nhap lai!",46,3);
+						 Canhbao("Nhap sai thang.Xin nhap lai!",30,1);
 						do
 						{
 							int key1 = getch();
@@ -2791,7 +3399,7 @@ void nhapNgayHD(Date &date)
 					{
 						
 						while(!kbhit())
-						 Canhbao("Khong duoc de trong.Xin nhap lai!",46,3);
+						 Canhbao("Khong duoc de trong.Xin nhap lai!",30,1);
 						do
 						{
 							int key1 = getch();
@@ -2806,16 +3414,16 @@ void nhapNgayHD(Date &date)
 							if(date.ngay >28 )
 							{
 								while(!kbhit())
-									Canhbao("Ngay cua thang khong hop le.Xin nhap Lai!",46,3);
+									Canhbao("Ngay cua thang khong hop le.Xin nhap Lai!",30,1);
 								do{
 									int key1 = getch();
 								}while(key!=13&&key!=9);
-								gotoxy(xMapTh+13+sngay.length(),y);
+								gotoxy(47+sngay.length(),y);
 								flag =1;
 							}
 							else
 							{
-								gotoxy(xMapTh+23+snam.length(),y);
+								gotoxy(63+snam.length(),y);
 								flag =3;
 							}
 						}
@@ -2824,22 +3432,22 @@ void nhapNgayHD(Date &date)
 							if(date.ngay >30)
 							{
 								while(!kbhit())
-									Canhbao("Ngay cua thang khong hop le.Xin nhap Lai!",46,3);
+									Canhbao("Ngay cua thang khong hop le.Xin nhap Lai!",30,1);
 								do{
 									int key1 = getch();
 								}while(key!=13&&key!=9);
-								gotoxy(xMapTh+13+sngay.length(),y);
+								gotoxy(47+sngay.length(),y);
 								flag =1;
 							}
 							else
 							{
-								gotoxy(xMapTh+23,y);
+								gotoxy(56,y);
 								flag =3;
 							}
 						}
 						else 
 						{
-							gotoxy(xMapTh+23+snam.length(),y);
+							gotoxy(63+snam.length(),y);
 							flag =3;
 						}
 						
@@ -2851,7 +3459,7 @@ void nhapNgayHD(Date &date)
 					{
 						
 						while(!kbhit())
-						 Canhbao("Khong duoc de trong.Xin nhap lai!",46,3);
+						 Canhbao("Khong duoc de trong.Xin nhap lai!",30,1);
 						do
 						{
 							int key1 = getch();
@@ -2868,11 +3476,11 @@ void nhapNgayHD(Date &date)
 								if(date.ngay >29)
 								{
 									while(!kbhit())
-									Canhbao("Ngay cua thang khong hop le.Xin nhap Lai!",46,3);
+									Canhbao("Ngay cua thang khong hop le.Xin nhap Lai!",30,1);
 									do{
 										int key1 = getch();
 									}while(key!=13&&key!=9);
-									gotoxy(xMapTh+13+sngay.length(),y);
+									gotoxy(47+sngay.length(),y);
 									flag =1;
 								}
 								else
@@ -2911,7 +3519,7 @@ void nhapNgayHD(Date &date)
 				{
 					if(vitri ==vitri-sthang.size())
 					{
-						gotoxy(xMapTh+13+sngay.size(),y);
+						gotoxy(47+sngay.size(),y);
 						flag =1;
 					}
 					else
@@ -2929,7 +3537,7 @@ void nhapNgayHD(Date &date)
 				{
 					if(vitri ==vitri-snam.size())
 					{				
-						gotoxy(xMapTh+18+sthang.size(),y);
+						gotoxy(56+sthang.size(),y);
 						flag =2;
 					}
 					else
@@ -2947,48 +3555,158 @@ void nhapNgayHD(Date &date)
 	}
 	if(check ==1) return;
 }
-void nhapHoaDon(Tree &vt,DSHD &l)
+int timdongianhap(string mavt)
 {
+	Date arr[MAXTK];
+	int nArr=0;
+	for(int j =0;j<dsnv.soLuongNV +1;j++)
+	{
+		NODE_HOADON *l = dsnv.nv[j].fisrtHD;
+		while(l!=NULL)
+		{
+			if(l->data.loai =='N')
+			{
+				for(NODECT_HOADON *k = l->data.fisrtCT;k!=NULL;k=k->pNext)
+				{
+					if(strcmp(k->Data.MaVT,mavt.c_str())==0)
+					{
+						arr[nArr++] = l->data.date;
+					}
+				}
+			}
+			l =l->pNext;
+		}
+	}
+	int maxNam = arr[0].nam;
+	int maxThang = arr[0].thang;
+	int maxNgay = arr[0].ngay;
+	int tam1,tam2,tam3;;
+	for(int i =1;i <=nArr;i++)
+	{
+		if(maxNam < arr[i].nam)
+		{
+			tam1 = maxNam ;
+			tam2 = maxThang;
+			tam3 = maxNgay;
+			maxNam = arr[i].nam;
+			maxNgay = arr[i].ngay;
+			maxThang = arr[i].thang;
+		}
+		if(tam1 == maxNam)
+		{
+			if(tam2 > maxThang)
+			{
+				maxNam =tam1;
+				maxThang =tam2;
+				maxNgay =tam3;
+			}
+			else if( tam2 == maxThang)
+			{
+				if(tam3 > maxNgay)
+				{
+					maxNam =tam1;
+					maxNgay =tam3;
+					maxThang = tam2;
+				}
+			}
+		}
+	}
+	for(int i =0;i<dsnv.soLuongNV +1;i++)
+	{
+		NODE_HOADON *p = dsnv.nv[i].fisrtHD;
+		while(p!=NULL)
+		{
+			if(p->data.loai =='N')
+			{
+				for(NODECT_HOADON *q = p->data.fisrtCT;q!=NULL;p=p->pNext)
+				{
+					if(strcmp(q->Data.MaVT,mavt.c_str())==0)
+					{
+						return q->Data.dongia;
+					}
+				}
+			}
+			p =p->pNext;
+		}
+	}
+}
+void nhapHoaDon(int tinhieu)
+{
+	system("cls");
+	textcolor(10);
+	gotoxy(44, 2);
+	if(tinhieu ==0)
+	{
+		cout << "HOA DON NHAP VAT TU";
+	}
+	else
+	{
+		cout << "HOA DON XUAT VAT TU";
+	}
+	textcolor(7);
+	gotoxy(60, 4);
+	cout << "So Hoa Don: ";
+	gotoxy(26,4);
+	cout << "Ma Nhan Vien: ";
+	textcolor(7);
 	HOADON hd;
-	CT_HOADON ct_hd;
+	int vtr;
+	ve1();
+	Ve1(10,8);
+	Ve2(10,8);
 	Date date;
 	layNgayThangHienTai(date.ngay, date.thang,date.nam);
-	string MSHD, MaNV,Loai;
+	string MSHD, MaNV;
 	int key,flag=1;
 	bool loop =0;
-		vegiaodienngay(xMapTh+5,yMapTh-5);
-		gotoxy(xMapTh+13,yMapTh-4);
-		cout << date.ngay;
-		gotoxy(xMapTh+18,yMapTh-4);
-		cout << date.thang;
-		gotoxy(xMapTh+23,yMapTh-4);
-		cout << date.nam;
-		nhapNgayHD(date);
-		hd.date = date;
-		gotoxy(xMapTh+12,yMapTh+1);
+	gotoxy(42, 3);
+	cout << "Ngay   "<< " Thang   "<< " Nam     ";
+	
+	gotoxy(47,3);
+	cout << date.ngay;
+	gotoxy(56,3);
+	cout << date.thang;
+	gotoxy(63,3);
+	cout << date.nam;
+Nhaplaingay:
+	int exit =0;
+	nhapNgayHD(date,exit);
+	if(exit ==1)
+	{
+		system("cls");
+		return;
+	}
+	gotoxy(40,4);
 		while(loop==0)
 		{
 			while(!kbhit())
 			{
 				int vitri;
 				key = getch();
-				if(flag==1) vitri =xMapTh+12 +MaNV.length();
-				else if(flag == 2) vitri = xMapTh+12 +MSHD.length();
-				else if(flag ==3) vitri = xMapTh+12 +Loai.length();
+				if(flag==1) vitri =40+MaNV.length();
+				else if(flag == 2) vitri = 72 +MSHD.length();
 				if(key == 0)
 				{
 					key = getch();
 				}
 				else if(key  == 27)
 				{
-					loop = 1;
-					break;
+					if(veKhungYesNo("       Ban co muon thoat?",0))
+					{
+						system("cls");
+						return;
+					}
+					else
+					{
+						xoaKhungYN();
+						continue;
+					}
 				}
 				if((key >= 48&& key <=57) || (key >=97 && key <=122) || (key >=65 && key <=90))
 				{
 					if(flag == 1 && MaNV.size()<10)
 					{
-						gotoxy(vitri,yMapTh+1);
+						gotoxy(vitri,4);
 						if(key >=97 && key <=122)
 							key = key -32;
 						cout << (char)key;
@@ -2996,24 +3714,13 @@ void nhapHoaDon(Tree &vt,DSHD &l)
 					}
 					else if(flag ==2 && MSHD.size() < 20)
 					{
-						gotoxy(vitri,yMapTh+3);
+						gotoxy(vitri,4);
 						if(key >=97 && key <=122)
 							key = key -32;
 						cout << (char)key;
 						MSHD.insert(MSHD.end(),1,(char)key);
 						
-					}
-					else if(flag ==3){
-						if(vitri-(xMapTh+12) <1 && (key == 110 || key == 78 || key == 120 ||key ==88))
-						{
-							gotoxy(vitri,yMapTh+5);
-							if(key == 110 || key == 120)
-								key = key -32;
-							Loai =(char)key;
-							cout << (char)key;
-						}
-						
-					}		
+					}	
 				}
 				else if(key ==13 || key ==9)
 				{
@@ -3023,34 +3730,28 @@ void nhapHoaDon(Tree &vt,DSHD &l)
 						{
 							while(!kbhit())
 							{
-								Canhbao("Khong duoc de trong!.Xin nhap lai!!",46,3);
+								Canhbao("Khong duoc de trong!.Xin nhap lai!!",30,1);
 							}
 							do{
 								int key1 = getch();
 							}while(key!=13&&key!=9);
-							gotoxy(vitri,yMapTh+1);
+							gotoxy(vitri,8);
 						}
-						else
+						else if(kiemTraTrungMNV(MaNV)==true)
 						{
-							int i;
-							for(i=0;i<dsnv.soLuongNV;i++)
-								if(dsnv.nv[i].MaNV==MaNV) break;
-							if(i ==dsnv.soLuongNV)
-							{
-								while(!kbhit())
+							while(!kbhit())
 								{
-									Canhbao("Ma "+MaNV+" Khong ton tai!.Xin nhap lai!!",46,3);
+									Canhbao("Ma "+MaNV+" Khong ton tai!.Xin nhap lai!!",30,1);
 								}
 								do{
 									int key1 = getch();
 								}while(key!=13&&key!=9);
-								gotoxy(vitri,yMapTh+1);
-							}
-							
-							else{
-								gotoxy(xMapTh+12,yMapTh+3);
-								flag =2;
-							}
+								gotoxy(vitri,4);
+						}
+						else
+						{
+							gotoxy(72,4);
+							flag =2;
 						}
 						
 					}
@@ -3060,162 +3761,146 @@ void nhapHoaDon(Tree &vt,DSHD &l)
 						{
 							while(!kbhit())
 							{
-								Canhbao("So hop dong phai la 20 ki tu!.Xin nhap lai!!",46,3);
+								Canhbao("So hop dong phai la 20 ki tu!.Xin nhap lai!!",30,1);
 							}
 							do{
 								int key1 = getch();
 							}while(key!=13&&key!=9);
-							gotoxy(vitri,yMapTh+3);
+							gotoxy(vitri,4);
 						}
-						else if(SearchHD(l,MSHD) != NULL)
+						else if(SearchHD(MSHD) != NULL)
 						{
 							while(!kbhit())
 							{
-								Canhbao("So hop dong "+MSHD+" da ton tai!.Xin nhap lai!!",46,3);
+								Canhbao("So hop dong "+MSHD+" da ton tai!.Xin nhap lai!!",30,1);
 							}
 							do{
 								int key1 = getch();
 							}while(key!=13&&key!=9);
-							gotoxy(vitri,yMapTh+3);						
+							gotoxy(vitri,4);						
 						}
 						
 						else
 						{
-							gotoxy(xMapTh+12,yMapTh+5);
-							flag =3;
-						}
-					}
-					else if(flag == 3)
-					{
-						if(Loai.size() ==0)
-						{
-							while(!kbhit())
-							{
-								Canhbao("Khong duoc de trong!.Xin nhap lai!!",46,3);
-							}
-							do{
-								int key1 = getch();
-							}while(key!=13&&key!=27);
-							gotoxy(vitri,yMapTh+5);
-						}
-						else
-						{
 							strcpy(hd.SoHD,MSHD.c_str());
-							strcpy(hd.MaNV,MaNV.c_str());
-							strcpy(hd.loai,Loai.c_str());
+							if(tinhieu ==0)
+							{
+								hd.loai='N';
+							}
+							else
+							{
+								hd.loai='X';
+							}
+							hd.fisrtCT=NULL;
+							hd.date = date;
+							for(int i =1;i<dsnv.soLuongNV+1;i++)
+							{
+								if(strcmp(dsnv.nv[i].MaNV,MaNV.c_str())==0)
+								{
+									vtr =i;
+									break;
+								}
+							}
 							loop =1;
-							
+							break;
+						}	
 						}
 					}
-					if(loop == 1)
-					{
-						InitCT_HD(hd.l);
-						ThemCT_HoaDon(vt,hd.l,Loai);
-						AddTailHD(l,Getnode(hd));
-						break;
-					}
-				}
 				else if(key == 8)
 				{
 						if(flag == 1&& MaNV.size() >0)
 						{
 							vitri--;
-							gotoxy(vitri,yMapTh+1);
+							gotoxy(vitri,4);
 							cout << " ";
-							gotoxy(vitri,yMapTh+1);
+							gotoxy(vitri,4);
 							MaNV.erase(MaNV.end()-1);
 						}
 						else if(flag == 2&&MSHD.size()>0)
 						{
 							vitri--;
-							gotoxy(vitri,yMapTh+3);
+							gotoxy(vitri,4);
 							cout << " ";
-							gotoxy(vitri,yMapTh+3);
+							gotoxy(vitri,4);
 							MSHD.erase(MSHD.end()-1);
-						}
-						else if(flag ==3&& Loai.size() >0)
-						{
-							vitri--;
-							gotoxy(vitri,yMapTh+5);
-							cout << " ";
-							gotoxy(vitri,yMapTh+5);
-							Loai.erase(Loai.end()-1);
-						}			
+						}		
 				}
 			}
-		}
-		if(loop == 1) return;
+	}
+	dsnv.nv[vtr].fisrtHD=ThemDSHDNV(dsnv.nv[vtr].fisrtHD,Getnode(hd));
+	if(tinhieu ==0)
+	{
+		NhapCT_HDNhap(dsnv.nv[vtr].fisrtHD);
+	}
+	else
+	{
+		NhapCT_HDXuat(dsnv.nv[vtr].fisrtHD);
+	}
 }
 	
-void ThemHoaDon(Tree &vt, DSHD &l)
+void ThemHoaDon(int tinhieu)
 {
-	if(vt == NULL)
-	{
-		Canhbao("Hien trong kho khong con vat tu nao!!",46,3);
-		system("Pause");
-		return;
-	}
 	if(dsnv.soLuongNV == 0)
 	{
-		Canhbao("Hien chua co nhan vien nao trong he thong!!",46,3);
-		system("Pause");
+		veKhungTB("       Khong co nhan vien");
+		system("cls");
 		return;
 	}
-		string arrten[4] = {"MaNV","SoHD","Loai"};
-		vebangThemMoi(arrten,3);
-		nhapHoaDon(vt,l);
+	if(t == NULL)
+	{
+		veKhungTB("         Khong co vat tu");
+		system("cls");
+		return;
+	}
+	system("cls");
+	nhapHoaDon(tinhieu);
 	
 }
-void XuatHD(HOADON hd, int stt)
-{
-	int y =16+stt;
-	gotoxy(arrDSHD[0]+1 +((arrDSHD[1] - arrDSHD[0] -to_String(stt+1).length())/2),y+stt);
-	cout << stt+1;
-	gotoxy(arrDSHD[1]+1 +(arrDSHD[2] - arrDSHD[1] -strlen(hd.SoHD)/2),y+stt);
-	cout << hd.SoHD;
-	gotoxy(arrDSHD[3]+3,y);
-	cout << hd.date.ngay << "/" <<hd.date.thang << "/" << hd.date.nam;
-	gotoxy(arrDSHD[4]+1 +(arrDSHD[5] - arrDSHD[4] -2),y+stt);
-	if(strcmp(hd.loai,"N") == 0 || strcmp(hd.loai,"n") == 0)
-	{
-		cout << "Nhap";	
-	}
-	else{
-		cout << "Xuat";
-	}
-}
 // xUat thong tin hoa don theo so hoa don nhap vao
-void XuatthongTinHoaDon(Tree vt,DSHD l)
+int kiemtraTonTaiHD()
+{
+	for(int i = 0; i < dsnv.soLuongNV+1; i++)
+	{
+		if(dsnv.nv[i].fisrtHD != NULL)
+		{
+			return 1;
+		}
+	}
+	return 0;
+}
+void XuatthongTinHoaDon()
 {
 	string SoHD;
 	string arrTukhoa[]={"So HD","Ngay Lap","Loai"};
-	int key,vitri,check =0,stt =0;
-	int y=16+stt;;
-	if(l.pHead == NULL)
+	int key,vitri,check =0,stt=0;
+	if(kiemtraTonTaiHD()== 0)
 	{
-		Canhbao("Khong co hoa don nao trong he thong.Xin kiem tra lai!!",45,3);
-		system("Pause");
-        return ;
+		veKhungTB("         Khong co hoa don");
+		system("cls");
+		return;
 	}
-
-		veOTimKiem("So Hoa Don");
-		gotoxy(xMapTimKiem+23,yMapTimKiem+1);
+		system("cls");
+		gotoxy(36,3);
+		cout <<"So Hoa Don: ";
+		int y =3;
+		NODE_HOADON *q;
+		gotoxy(48,y);
 		while(check ==0)
 		{
 			while(!kbhit())
 			{
-				vitri = xMapTimKiem+23+SoHD.length();
+				vitri = 48+SoHD.length();
 				key =getch();
 				if(key ==27)
 				{
-					check =2;
-					break;
+					system("cls");
+					return;
 				}
 				else if((key >= 48&& key <=57) || (key >=97 && key <=122) || (key >=65 && key <=90))
 				{
 					if(SoHD.length()  <20)
 					{
-						gotoxy(vitri,yMapTimKiem+1);
+						gotoxy(vitri,y);
 						if(key >=97 && key <=122)
 							key = key -32;
 						cout << (char)key;
@@ -3224,69 +3909,91 @@ void XuatthongTinHoaDon(Tree vt,DSHD l)
 				}
 				else if(key == 13 || key ==9)
 				{
-					if(SearchHD(l,SoHD)==NULL)
+					if(SearchHD(SoHD)==NULL)
 					{
 						while(!kbhit())
-							Canhbao("Khong tim thay so hoa don"+SoHD+".Xin kiem tra lai!!",45,3);
+							Canhbao("Khong tim thay so hoa don"+SoHD+".Xin kiem tra lai!!",30,1);
 						do{
 							int key1 = getch();
 						}while(key!=13&&key!=9);
-						gotoxy(vitri,yMapTimKiem+1);
+						gotoxy(vitri,y);
 					}
 					else
 					{
-						NODE_HOADON *q;
-						veBangNhapCT_HD();
-						NODECT_HOADON *p;
-						for(p = q->data.l.pHead;p!=NULL;p=p->pNext)
+						q=SearchHD(SoHD);
+						gotoxy(36,3);
+						cout <<"                                                          ";
+						gotoxy(20,3);
+						cout<<"So Hoa Don: ";
+						gotoxy(32,3);
+						cout << q->data.SoHD;
+						gotoxy(56,3);
+						cout << "Ngay Lap: ";
+						gotoxy(66,3);
+						cout << q->data.date.ngay << " / " << q->data.date.thang << " / " << q->data.date.nam;
+						gotoxy(82,3);
+						cout << "Loai: ";
+						gotoxy(88,3);
+						if(q->data.loai ='N')
 						{
-							XuatCT_HD(p->Data,stt);
+							cout << "Nhap";
+						}
+						else
+						{
+							cout << "Xuat";
+						}
+						NODECT_HOADON *p;
+						string arr[] ={"Ma Vat Tu","So Luong","Don Gia","%VAT"};
+						veBangChiTiet(arr,4);
+						for(p = q->data.fisrtCT;p!=NULL;p=p->pNext)
+						{
+							xuatCT_HD(p->Data,stt);
 							stt++;
 						}
-						check=1;
 					}
 				}
 				else if(key == 8 && SoHD.length() >0)
 				{
 					vitri--;
-					gotoxy(vitri,yMapTimKiem+1);
+					gotoxy(vitri,y);
 					cout << " ";
-					gotoxy(vitri,yMapTimKiem+1);
+					gotoxy(vitri,y);
 					SoHD.erase(SoHD.end()-1);
 				}
 			}
 		}
-	}								// THONG KE HOA DON
+}								// THONG KE HOA DON
 void xuatThongKe(THONGKE tk, int stt)
 {
-	int y =16+stt;
-	gotoxy(arrToaDoBangThongKeHD[0]+2,y);
+	int y =9+stt;
+	gotoxy(arrToaDoBangThongKeHD[0]+1,y);
 	cout << tk.SoHD;
-	gotoxy(arrToaDoBangThongKeHD[1]+2,y);
+	gotoxy(arrToaDoBangThongKeHD[1]+1,y);
 	cout << tk.date.ngay << "/"<<tk.date.thang << "/" <<tk.date.nam;
-	gotoxy(arrToaDoBangThongKeHD[2]+2,y);
+	gotoxy(arrToaDoBangThongKeHD[2]+1,y);
 	cout << tk.Loai;
-	gotoxy(arrToaDoBangThongKeHD[3]+2,y);
+	gotoxy(arrToaDoBangThongKeHD[3]+1,y);
 	cout << tk.HoTenNV;
-	gotoxy(arrToaDoBangThongKeHD[4]+2,y);
+	gotoxy(arrToaDoBangThongKeHD[4]+1,y);
 	cout << tk.donGia;
 }
 void xuatDSTK(DS_THONGKE &l, int page)
 {
+	Nocursortype();
 	veBangThongKeHD();
 	int stt=0;
-	for(int i =page*12;i < (l.soTK >(page+1)*12 ? 12 : l.soTK-page*12);i++)
+	for(int i =page*1;i < (l.soTK >(page+1)*14 ? 14 : l.soTK-page*14);i++)
 	{
 		xuatThongKe(l.tk[i],stt++);
 	}
 }
-void xulyDSTK(DS_THONGKE &l,NHANVIEN nv, Date first, Date final)
+void xulyDSTK(NHANVIEN nv, Date first, Date final)
 {
 	int checkDate1,checkDate2;
 	int donGia =0,kq;
-	for(NODE_HOADON* p = nv.l.pHead; p!= NULL; p= p->pNext)
+	for(NODE_HOADON* p = nv.fisrtHD; p!= NULL; p= p->pNext)
 	{
-		string name =" ";
+		string name ="";
 		checkDate1 = soSanhNgay(p->data.date,first);
 		checkDate1 = soSanhNgay(p->data.date,final);
 		if((checkDate1 ==1|| checkDate1 ==0) && (checkDate2 == -1|| checkDate2 == 0) )
@@ -3294,31 +4001,32 @@ void xulyDSTK(DS_THONGKE &l,NHANVIEN nv, Date first, Date final)
 			name +=nv.Ho;
 			name+=" ";
 			name+=nv.Ten;
-			strcpy(l.tk[l.soTK].SoHD, p->data.SoHD);
-			l.tk[l.soTK].date = p->data.date;
-			strcpy(l.tk[l.soTK].Loai,p->data.loai);
-			l.tk[l.soTK].HoTenNV = name;
-			for(NODECT_HOADON* q =p->data.l.pHead; q!=NULL; q=q->pNext)
+			strcpy(dstk.tk[dstk.soTK].SoHD, p->data.SoHD);
+			dstk.tk[dstk.soTK].date = p->data.date;
+			dstk.tk[dstk.soTK].Loai=p->data.loai;
+			dstk.tk[dstk.soTK].HoTenNV = name;
+			for(NODECT_HOADON* q =p->data.fisrtCT; q!=NULL; q=q->pNext)
 			{
-				kq = q->Data.soluong*q->Data.dongia;
-				donGia +=kq+(q->Data.VAT*kq)/100;
+				kq = q->Data.soluong*q->Data.dongia+(q->Data.VAT/100)*q->Data.dongia;
+				donGia +=kq;
 			}
-			l.tk[l.soTK++].donGia = donGia;
+			dstk.tk[dstk.soTK++].donGia = donGia;
 		}
 	}
 }
-void nhapNgay(Date &first, Date &final)
+void nhapNgay(Date &first, Date &final,int exit)
 {
-	int xMapNgay =77,xMapThang =82,xMapNam=87;
-	int xMapNgay2 = 109,xMapThang2=114,xMapNam2=119;
+	int xMapNgay =43,xMapThang =48,xMapNam=53;
+	int xMapNgay2 = 77,xMapThang2=83,xMapNam2=88;
 	
 nhaplai:
 	int flag =1;
 	int check =0;
-	int y=9;
+	int y=3;
 	int vitri;
 	int key,lengh,kq;
 	string sngay,sthang,snam,sngay2,sthang2,snam2;
+	gotoxy(43,y);
 	while(check == 0)
 	{
 		
@@ -3349,6 +4057,7 @@ nhaplai:
 			key = getch();
 			if(key == 27)
 			{
+				exit =1;
 				check =1;
 				break;
 			}
@@ -3404,7 +4113,7 @@ nhaplai:
 					if(first.ngay < 0 || first.ngay > 31)
 					{
 						while(!kbhit())
-						 Canhbao("Nhap sai ngay.Xin nhap lai!",46,3);
+						 Canhbao("Nhap sai ngay.Xin nhap lai!",30,1);
 						do
 						{
 							int key1 = getch();
@@ -3416,7 +4125,7 @@ nhaplai:
 					{
 						
 						while(!kbhit())
-						 Canhbao("Khong duoc de trong.Xin nhap lai!",46,3);
+						 Canhbao("Khong duoc de trong.Xin nhap lai!",30,1);
 						do
 						{
 							int key1 = getch();
@@ -3434,7 +4143,7 @@ nhaplai:
 					{
 						
 						while(!kbhit())
-						 Canhbao("Khong duoc de trong.Xin nhap lai!",46,3);
+						 Canhbao("Khong duoc de trong.Xin nhap lai!",30,1);
 						do
 						{
 							int key1 = getch();
@@ -3445,7 +4154,7 @@ nhaplai:
 					{
 						
 						while(!kbhit())
-						 Canhbao("Nhap sai thang.Xin nhap lai!",46,3);
+						 Canhbao("Nhap sai thang.Xin nhap lai!",30,1);
 						do
 						{
 							int key1 = getch();
@@ -3461,7 +4170,7 @@ nhaplai:
 							if(first.ngay >28 )
 							{
 								while(!kbhit())
-									Canhbao("Ngay cua thang khong hop le.Xin nhap Lai!",46,3);
+									Canhbao("Ngay cua thang khong hop le.Xin nhap Lai!",30,1);
 								do{
 									int key1 = getch();
 								}while(key!=13&&key!=9);
@@ -3479,7 +4188,7 @@ nhaplai:
 							if(first.ngay >30)
 							{
 								while(!kbhit())
-									Canhbao("Ngay cua thang khong hop le.Xin nhap Lai!",46,3);
+									Canhbao("Ngay cua thang khong hop le.Xin nhap Lai!",30,1);
 								do{
 									int key1 = getch();
 								}while(key!=13&&key!=9);
@@ -3506,7 +4215,7 @@ nhaplai:
 					{
 						
 						while(!kbhit())
-						 Canhbao("Nhap sai nam, nam phai be hon "+to_String(layNamHienTai())+".Xin nhap lai!",46,3);
+						 Canhbao("Nhap sai nam, nam phai be hon "+to_String(layNamHienTai())+".Xin nhap lai!",30,1);
 						do
 						{
 							int key1 = getch();
@@ -3523,7 +4232,7 @@ nhaplai:
 								if(first.ngay >29)
 								{
 									while(!kbhit())
-									Canhbao("Ngay cua thang khong hop le.Xin nhap Lai!",46,3);
+									Canhbao("Ngay cua thang khong hop le.Xin nhap Lai!",30,1);
 									do{
 										int key1 = getch();
 									}while(key!=13&&key!=9);
@@ -3556,7 +4265,7 @@ nhaplai:
 					if(final.nam == 0)
 					{
 						while(!kbhit())
-						 Canhbao("Khong duoc de trong.Xin nhap lai!",46,3);
+						 Canhbao("Khong duoc de trong.Xin nhap lai!",30,1);
 						do
 						{
 							int key1 = getch();
@@ -3566,7 +4275,7 @@ nhaplai:
 					else if(final.nam < first.nam || final.nam > layNamHienTai())
 					{
 						while(!kbhit())
-						 Canhbao("Nhap sai nam,nam phai be hon "+to_String(layNamHienTai())+".Xin nhap lai!",46,3);
+						 Canhbao("Nhap sai nam,nam phai be hon "+to_String(layNamHienTai())+".Xin nhap lai!",30,1);
 						do
 						{
 							int key1 = getch();
@@ -3584,7 +4293,7 @@ nhaplai:
 					if(final.ngay == 0)
 					{
 						while(!kbhit())
-						 Canhbao("Khong duoc de trong.Xin nhap lai!",46,3);
+						 Canhbao("Khong duoc de trong.Xin nhap lai!",30,1);
 						do
 						{
 							int key1 = getch();
@@ -3594,7 +4303,7 @@ nhaplai:
 					else if(final.ngay < 0 || final.ngay >31)
 					{
 						while(!kbhit())
-						 Canhbao("Nhap sai ngay.Xin nhap lai!",46,3);
+						 Canhbao("Nhap sai ngay.Xin nhap lai!",30,1);
 						do
 						{
 							int key1 = getch();
@@ -3614,7 +4323,7 @@ nhaplai:
 					{
 						
 						while(!kbhit())
-						 Canhbao("Khong duoc de trong.Xin nhap lai!",46,3);
+						 Canhbao("Khong duoc de trong.Xin nhap lai!",30,1);
 						do
 						{
 							int key1 = getch();
@@ -3624,7 +4333,7 @@ nhaplai:
 					else if(final.thang <0 || final.thang >12)
 					{
 						while(!kbhit())
-						 Canhbao("Nhap sai thang.Xin nhap lai!",46,3);
+						 Canhbao("Nhap sai thang.Xin nhap lai!",30,1);
 						do
 						{
 							int key1 = getch();
@@ -3639,7 +4348,7 @@ nhaplai:
 							if(final.ngay >28 )
 							{
 								while(!kbhit())
-									Canhbao("Ngay cua thang khong hop le.Xin nhap Lai!",46,3);
+									Canhbao("Ngay cua thang khong hop le.Xin nhap Lai!",30,1);
 								do{
 									int key1 = getch();
 								}while(key!=13&&key!=9);
@@ -3657,7 +4366,7 @@ nhaplai:
 							if(final.ngay >30)
 							{
 								while(!kbhit())
-									Canhbao("Ngay cua thang khong hop le.Xin nhap Lai!",46,3);
+									Canhbao("Ngay cua thang khong hop le.Xin nhap Lai!",30,1);
 								do{
 									int key1 = getch();
 								}while(key!=13&&key!=9);
@@ -3691,83 +4400,134 @@ nhaplai:
 				}
 				else if(flag ==2 && sthang.size() >0)
 				{
-					vitri--;
-					gotoxy(vitri,y);
-					cout <<" ";
-					gotoxy(vitri,y);
-					sthang.erase(sthang.end()-1);
-					first.thang = atoi(sthang.c_str());
+					if(sthang.size() == 0)
+					{
+						gotoxy(43+sngay.size(),y);
+						flag=1;
+					}
+					else
+					{
+						vitri--;
+						gotoxy(vitri,y);
+						cout <<" ";
+						gotoxy(vitri,y);
+						sthang.erase(sthang.end()-1);
+						first.thang = atoi(sthang.c_str());
+					}
+					
 				}
 				else if(flag == 3&& snam.size() >0)
 				{
-					vitri--;
-					gotoxy(vitri,y);
-					cout <<" ";
-					gotoxy(vitri,y);
-					snam.erase(snam.size()-1);
-					first.nam = atoi(snam.c_str());
+					if(snam.size()==0)
+					{
+						gotoxy(48+sthang.size(),y);
+						flag =2;
+					}
+					else
+					{
+						vitri--;
+						gotoxy(vitri,y);
+						cout <<" ";
+						gotoxy(vitri,y);
+						snam.erase(snam.size()-1);
+						first.nam = atoi(snam.c_str());
+					}
+					
 				}
 				if(flag ==4 && sngay2.size() >0)
 				{
-					vitri--;
-					gotoxy(vitri,y);
-					cout <<" ";
-					gotoxy(vitri,y);
-					sngay2.erase(sngay2.end()-1);
-					final.ngay = atoi(sngay2.c_str());
+					if(sngay2.size() ==0)
+					{
+						gotoxy(53+snam.size(),y);
+						flag =3;
+					}
+					else
+					{
+						vitri--;
+						gotoxy(vitri,y);
+						cout <<" ";
+						gotoxy(vitri,y);
+						sngay2.erase(sngay2.end()-1);
+						final.ngay = atoi(sngay2.c_str());
+					}
+				
 				}
 				else if(flag ==5 && sthang2.size() >0)
 				{
-					vitri--;
-					gotoxy(vitri,y);
-					cout <<" ";
-					gotoxy(vitri,y);
-					sthang2.erase(sthang2.end()-1);
-					final.thang = atoi(sthang2.c_str());
+					if(sthang2.size() ==0)
+					{
+						gotoxy(76+sngay2.size(),y);
+						flag =4;
+					}
+					else
+					{
+						vitri--;
+						gotoxy(vitri,y);
+						cout <<" ";
+						gotoxy(vitri,y);
+						sthang2.erase(sthang2.end()-1);
+						final.thang = atoi(sthang2.c_str());
+					}
+					
 				}
 				else if(flag == 6&& snam2.size() >0)
 				{
-					vitri--;
-					gotoxy(vitri,y);
-					cout <<" ";
-					gotoxy(vitri,y);
-					snam2.erase(snam2.size()-1);
-					final.nam = atoi(snam2.c_str());
+					if(snam2.size() ==0)
+					{
+						gotoxy(82+sthang2.size(),y);
+						flag =5;
+					}
+					else
+					{
+						vitri--;
+						gotoxy(vitri,y);
+						cout <<" ";
+						gotoxy(vitri,y);
+						snam2.erase(snam2.size()-1);
+						final.nam = atoi(snam2.c_str());
+					}
+					
 				}
 			}
 		
 		}
 	}
-	if(check ==1) return;
 }
-void thongKeHD(DS_THONGKE &l,DSHD dshd)
+void thongKeHD()
 {
-	l.soTK =0;
+	dstk.soTK =0;
 	Date first, final;
-	int page =0, key, dem = l.soTK;
+	int page =0, key, dem = dstk.soTK;
 	string name = "BANG LIET KE HOA DON TRONG KHOANG THOI GIAN";
 	string name2 = "TU NGAY :    /    /     \t DEN NGAY :    /    /     ";
 	
-	if(dshd.pHead== NULL)
+	if(kiemtraTonTaiHD()== 0)
 	{
-		Canhbao("Hien tai khong co hoa don nao trong he thong.!!",46,3);
-		system("PAUSE");
-		getch();
+		veKhungTB("         Khong co hoa don");
+		system("cls");
 		return;
 	}
-		gotoxy(70, 7);
+	system("cls");
+	textcolor(10);
+		gotoxy(40, 2);
 		cout << name;
-		gotoxy(67, 9);
+		gotoxy(33, 3);
+		textcolor(7);
 		cout << name2;
-		nhapNgay(first,final);
-		for(int i = 0; i <dsnv.soLuongNV;i++)
+		int exit =0;
+		nhapNgay(first,final,exit);
+		if(exit ==1)
 		{
-			xulyDSTK(l,dsnv.nv[i],first,final);
+			system("cls");
+			return;
 		}
-		gotoxy(0,0);
+		for(int i = 1; i <dsnv.soLuongNV+1;i++)
+		{
+			xulyDSTK(dsnv.nv[i],first,final);
+		}
 		while(true)
 		{
-			xuatDSTK(l,page);
+			xuatDSTK(dstk,page);
 			while(!kbhit())
 			{
 				key = getch();
@@ -3788,7 +4548,7 @@ void thongKeHD(DS_THONGKE &l,DSHD dshd)
 				}
 				else if(key == 27)
 				{
-					clrscr();
+					system("cls");
 					return;
 				}
 		 } 
@@ -3797,10 +4557,9 @@ void thongKeHD(DS_THONGKE &l,DSHD dshd)
 }
 									// KET THUC
 									// MENU
-void MenuVT(Tree &t)
+void MenuVT()
 {
-	InitVT(t);
-	xoaMenu();
+	system("cls");
 	string arrVT[6] ={"         Nhap vat tu         ","        Tim kiem vat tu      ","      Hieu chinh vat tu      ","          Xoa Vat tu         ","    10 VT co tan suat cao    ","    Danh sach VT trong kho   "};
 	vemenu(arrMenuVT,arrVT,6);
 	int vitri=0;
@@ -3808,14 +4567,14 @@ void MenuVT(Tree &t)
 	while(true)
 	{
 			Nocursortype();
-			hcn(5,arrMenuVT[vitri],arrVT[vitri],true);
+			hcn(yMapMN,arrMenuVT[vitri],arrVT[vitri],true);
 			key = getch();
 			if(key ==224)
 			{
 				key = getch();
 				if(key == 80)
 				{
-					hcn(5,arrMenuVT[vitri],arrVT[vitri]);
+					hcn(yMapMN,arrMenuVT[vitri],arrVT[vitri]);
 					vitri++;
 					if(vitri==6)
 					{
@@ -3824,7 +4583,7 @@ void MenuVT(Tree &t)
 				}
 				else if(key == 72 && vitri >0)
 				{
-					hcn(5,arrMenuVT[vitri],arrVT[vitri]);
+					hcn(yMapMN,arrMenuVT[vitri],arrVT[vitri]);
 					vitri--;
 				}
 			}
@@ -3834,48 +4593,42 @@ void MenuVT(Tree &t)
 			}
 			else if(key == 13)
 			{
-				hcn(5,arrMenuVT[vitri],arrVT[vitri]);
+				hcn(yMapMN,arrMenuVT[vitri],arrVT[vitri]);
 				Yescursortype();
 				switch(vitri)
 				{
 					case 0:
-						themVatTu(t);
+						nhapVatTu();
 						break;
 					case 1:
-						timKiemVT(t,soVT);
+						timKiemVT();
 						break;
 					case 2:
-						hieuChinhVatTu(t);
+						hieuChinhVatTu();
 						break;
 					case 3:
-						xoaVatTu(t,soVT);
+						xoaVatTu();
 						break;
 					case 4:
 						
 						break;
 					case 5:
-						quanLysangTrangVT(t);
+						quanLysangTrangVT();
 						break;
-				}
-				if(vitri ==0)
-				{
-					xoaNoiDungTrongKhungThem();
 				}
 				vemenu(arrMenuVT,arrVT,6);
 			}
 			else if(key == 27)
 			{
-				xoaMenu();
-				xoaNoiDungTrongKhungThem();
-				XoaOMain();
+				system("cls");
 				return;
 			}
 		}
 }
 void MenuNV()
 {
-	docNhanVien();
-	xoaMenu();
+//	docNhanVien();
+	system("cls");
 	string arrVT[5] ={"        Nhap nhan vien       ","    In danh sach nhan vien   ","       Tim kiem nhan vien    ","         Xoa nhan vien       ","         Save nhan vien      "};
 	vemenu(arrMenuVT,arrVT,5);
 	int vitri=0;
@@ -3884,14 +4637,14 @@ void MenuNV()
 	{
 
 			Nocursortype();
-			hcn(5,arrMenuVT[vitri],arrVT[vitri],true);
+			hcn(yMapMN,arrMenuVT[vitri],arrVT[vitri],true);
 			key = getch();
 			if(key ==224)
 			{
 				key = getch();
 				if(key == 80)
 				{
-					hcn(5,arrMenuVT[vitri],arrVT[vitri]);
+					hcn(yMapMN,arrMenuVT[vitri],arrVT[vitri]);
 					vitri++;
 					if(vitri==5)
 					{
@@ -3900,7 +4653,7 @@ void MenuNV()
 				}
 				else if(key == 72 && vitri >0)
 				{
-					hcn(5,arrMenuVT[vitri],arrVT[vitri]);
+					hcn(yMapMN,arrMenuVT[vitri],arrVT[vitri]);
 					vitri--;
 				}
 			}
@@ -3910,7 +4663,7 @@ void MenuNV()
 			}
 			else if(key == 13)
 			{
-				hcn(5,arrMenuVT[vitri],arrVT[vitri]);
+				hcn(yMapMN,arrMenuVT[vitri],arrVT[vitri]);
 				Yescursortype();
 				switch(vitri)
 				{
@@ -3930,43 +4683,36 @@ void MenuNV()
 						ghiNhanVien();
 						break;
 				}
-				if(vitri ==0)
-				{
-					xoaNoiDungTrongKhungThem();
-				}
 				vemenu(arrMenuVT,arrVT,5);
 			}
 			else if(key == 27)
 			{
-				xoaMenu();
-				xoaNoiDungTrongKhungThem();
-				XoaOMain();
+				system("cls");
 				return;
 			}
 		}
 
 }
-void menuHD(Tree &vt,DSHD &l,DS_THONGKE &ds)
+void menuHD()
 {
-	InitHD(l);
-	xoaMenu();
-	string arrNameHD[5] ={"    Lap Hoa Don Nhap/Xuat    ","     In Hoa Don Theo SoHD    ","       Thong Ke Hoa Don      ","        Save Hoa Don         "};
-	vemenu(arrMenuVT,arrNameHD,4);
+	system("cls");
+	string arrNameHD[6] ={"       Lap Hoa Don Nhap      ","       Lap Hoa Don Xuat      ","     In Hoa Don Theo SoHD    ","       Thong Ke Hoa Don      ","        Save Hoa Don         "};
+	vemenu(arrMenuVT,arrNameHD,5);
 	int vitri=0;
 	int key;
 	while(true)
 	{
 			Nocursortype();
-			hcn(5,arrMenuVT[vitri],arrNameHD[vitri],true);
+			hcn(yMapMN,arrMenuVT[vitri],arrNameHD[vitri],true);
 			key = getch();
 			if(key ==224)
 			{
 				key = getch();
 				if(key == 80)
 				{
-					hcn(5,arrMenuVT[vitri],arrNameHD[vitri]);
+					hcn(yMapMN,arrMenuVT[vitri],arrNameHD[vitri]);
 					vitri++;
-					if(vitri==4)
+					if(vitri==5)
 					{
 						vitri=0;
 					}
@@ -3974,7 +4720,7 @@ void menuHD(Tree &vt,DSHD &l,DS_THONGKE &ds)
 				else if(key == 72 && vitri >0)
 				{	
 					
-					hcn(5,arrMenuVT[vitri],arrNameHD[vitri]);
+					hcn(yMapMN,arrMenuVT[vitri],arrNameHD[vitri]);
 					vitri--;
 				}
 			}
@@ -3984,40 +4730,37 @@ void menuHD(Tree &vt,DSHD &l,DS_THONGKE &ds)
 			}
 			else if(key == 13)
 			{
-				hcn(5,arrMenuVT[vitri],arrNameHD[vitri]);
+				hcn(yMapMN,arrMenuVT[vitri],arrNameHD[vitri]);
 				Yescursortype();
 				switch(vitri)
 				{
 					case 0:
-						ThemHoaDon(vt,l);
+						ThemHoaDon(0);
 						break;
 					case 1:
-						XuatthongTinHoaDon(vt,l);
+						ThemHoaDon(1);
 						break;
 					case 2:
-						thongKeHD(ds,l);
+						XuatthongTinHoaDon();
 						break;
 					case 3:
+						thongKeHD();
+						break;
+					case 4:
 						break;	
 				}
-				if(vitri ==0)
-				{
-					xoaNoiDungTrongKhungThem();
-				}
-				vemenu(arrMenuVT,arrNameHD,4);
+				vemenu(arrMenuVT,arrNameHD,5);
 			}
 			else if(key == 27)
 			{
-				xoaMenu();
-				xoaNoiDungTrongKhungThem();
-				XoaOMain();
+				system("cls");
 				return;
 			}
 		}
 }
-void MenuChinh(Tree &vt,DSHD &l,DS_THONGKE &ds)
+void MenuChinh()
 { 
-    veKhungGiaoDienChinh();
+	system("cls");
 	string arrTuKhoa[4] = { "            Vat Tu           " ,"           Nhan vien         ","            Hoa don          ","     Luu toan bo du lieu     "};
 	vemenu(arrMenuVT,arrTuKhoa,4);
 	int vitri =0;
@@ -4026,14 +4769,14 @@ void MenuChinh(Tree &vt,DSHD &l,DS_THONGKE &ds)
 	while(check ==0)
 	{
 			Nocursortype();
-			hcn(5,arrMenuVT[vitri],arrTuKhoa[vitri],true);
+			hcn(yMapMN,arrMenuVT[vitri],arrTuKhoa[vitri],true);
 			key = getch();
 			if(key ==224)
 			{
 				key = getch();
 				if(key == 80)
 				{
-					hcn(5,arrMenuVT[vitri],arrTuKhoa[vitri]);
+					hcn(yMapMN,arrMenuVT[vitri],arrTuKhoa[vitri]);
 					vitri++;
 					if(vitri==4)
 					{
@@ -4042,7 +4785,7 @@ void MenuChinh(Tree &vt,DSHD &l,DS_THONGKE &ds)
 				}
 				else if(key == 72&& vitri >0)
 				{
-					hcn(5,arrMenuVT[vitri],arrTuKhoa[vitri]);
+					hcn(yMapMN,arrMenuVT[vitri],arrTuKhoa[vitri]);
 					vitri--;
 					
 				}
@@ -4053,46 +4796,46 @@ void MenuChinh(Tree &vt,DSHD &l,DS_THONGKE &ds)
 			}
 			else if(key == 13)
 			{
-				hcn(5,arrMenuVT[vitri],arrTuKhoa[vitri]);
+				hcn(yMapMN,arrMenuVT[vitri],arrTuKhoa[vitri]);
 				Yescursortype();
 				switch(vitri)
 				{
 					case 0:
-						MenuVT(vt);
+						MenuVT();
 						break;
 					case 1:
 						MenuNV();
 						break;
 					case 2:
-						menuHD(vt,l,ds);
+						menuHD();
 						break;
 					case 3:
 						break;
 				}
-				xoaMenu();
-				xoaNoiDungTrongKhungThem();
-				XoaOMain();
 				vemenu(arrMenuVT,arrTuKhoa,4);
 			}
 			else if(key == 27)
 			{
-				xoaMenu();
-				xoaNoiDungTrongKhungThem();
-				XoaOMain();
-				return;
+				if(veKhungYesNo("       Ban co muon thoat?",0))
+				{
+					system("cls");
+					return;
+				}
+				else
+				{
+					system("cls");
+					vemenu(arrMenuVT,arrTuKhoa,4);
+					continue;
+				}
 			}
 		}
 }
 
+
 									// KET THUC
 int main(){
-	resizeConsole(1100,860);
-	Tree t;
-	DSHD l;
-	DS_THONGKE ds;
-	
-	MenuChinh(t,l,ds);
-
+	resizeConsole(800,700);
+	InitVT(t);
+	MenuChinh();
 	getch();
 }
-# QLVatTu
