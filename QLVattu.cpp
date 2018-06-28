@@ -1,7 +1,6 @@
 #include<iostream>
-#include <string>
-#include <string.h>
-#include <mylib.h>
+#include "mylib.h"
+#include <cstring>
 #include <fstream>
 #include <ctime>
 #include <cmath>
@@ -51,8 +50,9 @@ struct NHANVIEN{
 	char MaNV[11];
 	char Ho[21];
 	char Ten[21];
-	char Phai[3];
+	char Phai[4];
 	NODE_HOADON* fisrtHD;
+	
 };
 struct DSNV
 {
@@ -60,7 +60,6 @@ struct DSNV
 	int soLuongNV=0;
 };
 DSNV dsnv;
-DSNV dsnvOld;
 struct VATTU{
 	char MaVT[11];
 	char TenVT[21];
@@ -805,6 +804,33 @@ string to_String(int num)
 	kq = convert.str();
 	return kq;
 }
+string to_Currency(int num)
+{
+	int x;
+	int A[20];
+	int nArr=0;
+	while(num!=0)
+	{
+		x =num%10;
+		num =num/10;
+		A[nArr++] = x;
+	}
+	string str="";
+	for(int i =0; i<nArr; i++)
+	{
+		if(i%3==0&&i != 0)
+		{
+			str+=",";	
+		}
+		str+=to_String(A[i]);
+	}
+	string str1;
+	for(int j = str.length()-1; j >=0 ; j--)
+	{
+			str1+=str.at(j);
+	}
+	return str1;
+}
 void Canhbao(string s,int xMap,int yMap)
 {
     do
@@ -842,9 +868,9 @@ void ContentRemoveCT()
 	gotoxy(19,7);
 	cout << "            ";
 	gotoxy(34,7);
-	cout << "                      ";
+	cout << "                    ";
 	gotoxy(56,7);
-	cout << "                      ";
+	cout << "                  ";
 	gotoxy(77,7);
 	cout << "       ";
 }
@@ -1455,11 +1481,11 @@ void VatTuXuat(VATTU data,int stt)
 {
 	gotoxy(20,3+yMap +stt*2);
 	cout << data.MaVT;
-	gotoxy(36+((21-strlen(data.TenVT))/2),3+yMap +stt*2);
+	gotoxy(40,3+yMap +stt*2);
 	cout << data.TenVT;
 	gotoxy(57+((26-to_String(data.SoLuongTon).size())/2),3+yMap +stt*2);
 	cout << data.SoLuongTon;
-	gotoxy(75+((27-strlen(data.DVT))/2),3+yMap +stt*2);
+	gotoxy(87,3+yMap +stt*2);
 	cout << data.DVT;
 }
 void HoanDoiString(string &a, string &b)
@@ -1469,18 +1495,36 @@ void HoanDoiString(string &a, string &b)
 	a = b;
 	b =temp;
 }
-void VatTuSort(string arrMVT[],int &nVT)
+void Sort(string *&arrMVT,int trai,int phai)
 {
-	for(int i=0;i< nVT;i++)
+	int i =trai;
+	int j =phai;
+	string pivot = arrMVT[(trai+phai)/2];
+	while(i <= j)
 	{
-		for(int j = nVT-1; j >i;j--)
+		while(arrMVT[i] < pivot)
+			i++;
+		while(arrMVT[j] > pivot)
+			j--;
+		if(i <= j)
 		{
-			if(strcmp(VatTuSearch(t,arrMVT[j-1])->Data.TenVT,VatTuSearch(t,arrMVT[j])->Data.TenVT) == 1)
-			{
-				HoanDoiString(arrMVT[j-1],arrMVT[j]);
-			}
+			HoanDoiString(arrMVT[i],arrMVT[j]);
+			i++;
+			j--;
 		}
 	}
+	if(trai < j)
+	{
+		Sort(arrMVT,trai,j);
+	}
+	if(i < phai)
+	{
+		Sort(arrMVT,i,phai);
+	}
+}
+void VatTuSort(string arrMVT[],int &nVT)
+{
+	Sort(arrMVT,0,nVT-1);
 }
 void VatTuXuatDS(string MVT[],int &nArr, int vitri =0)
 {
@@ -1889,7 +1933,7 @@ void VatTuHieuChinh()
 	string mavt;
 	int loop =0;
 	int key1,vitri1;
-	NODE_VATTU * q;
+	NODE_VATTU *q;
 	while(loop ==0)
 	{
 		while(!kbhit())
@@ -1964,9 +2008,9 @@ void VatTuHieuChinh()
 	}
 	int exit =0;
 	int key,vtr;
-	string tam1 = q->Data.MaVT,tam2=q->Data.TenVT,tam3=q->Data.DVT;
+	string tam2=q->Data.TenVT,tam3=q->Data.DVT;
 	int slt = q->Data.SoLuongTon;
-	int th=3;
+	int th=2;
 	gotoxy(79+tam3.size(),7);
 	char space;
 	VATTU data;
@@ -1976,13 +2020,9 @@ void VatTuHieuChinh()
 		{
 			if(th==1)
 			{
-				vtr = 20+tam1.size();
-			}
-			else if(th==2)
-			{
 				vtr = 35+tam2.size();
 			}
-			else if(th ==3)
+			else if(th ==2)
 			{
 				vtr = 79+tam3.size();
 			}
@@ -2006,15 +2046,7 @@ void VatTuHieuChinh()
 			}
 			else if((key >= 48&& key <=57) || (key >=97 && key <=122) || (key >=65 && key <=90) || key ==32)
 			{
-				if(th==1 && tam1.size() <10&& key !=32)
-				{
-					gotoxy(vtr,7);
-					if(key >=97 && key <=122)
-						key = key -32;
-					cout << (char)key;
-					tam1.insert(tam1.end(),1,(char)key);
-				}
-				else if(th==2 && tam2.size() < 20)
+				if(th==1 && tam2.size() < 20)
 				{
 					gotoxy(vtr,7);
 					if(key ==32)
@@ -2036,7 +2068,7 @@ void VatTuHieuChinh()
 					cout << char(key);
 					tam2.insert(tam2.end(),1,(char)key);
 				}
-				else if(th==3 && tam3.size() <5)
+				else if(th==2 && tam3.size() <5)
 				{
 					gotoxy(vtr,7);
 					if(key ==32)
@@ -2063,48 +2095,6 @@ void VatTuHieuChinh()
 			{
 				if(th==1)
 				{
-					if(tam1.size()==0)
-					{
-						tam1=q->Data.MaVT;
-						gotoxy(20,7);
-						cout << tam1;
-						gotoxy(35+tam2.size(),7);
-						th=2;
-					}
-					else if(tam1.size() <10)
-					{
-						while(!kbhit())
-							Canhbao("Ma vat tu la 10 ky tu.Xin nhap lai lai!!",30,1);
-						do{
-							int key2 = getch();
-						}while(key!=13);
-						gotoxy(vtr,7);
-					}
-					if(strcmp(tam1.c_str(),q->Data.MaVT)==0)
-					{
-						tam1=q->Data.MaVT;
-						gotoxy(20,7);
-						cout << tam1;
-						gotoxy(35+tam2.size(),7);
-						th=2;
-					}
-					else if(VatTukiemTraTrungMa(t,tam1)!=NULL)
-					{
-						while(!kbhit())
-							Canhbao("Trung ma vat tu.Xin kiem tra lai!!",30,1);
-						do{
-							int key2 = getch();
-						}while(key!=13);
-						gotoxy(vtr,7);
-					}
-					else
-					{
-						gotoxy(35+tam2.size(),7);
-						th=2;
-					}
-				}
-				else if(th==2)
-				{
 					if(tam2.size()==0)
 					{
 						tam2=q->Data.TenVT;
@@ -2113,10 +2103,10 @@ void VatTuHieuChinh()
 					}
 					else{
 						gotoxy(79+tam3.size(),7);
-						th=3;
+						th=2;
 					}
 				}
-				else if(th==3)
+				else if(th==2)
 				{
 					if(tam3.size()==0)
 					{
@@ -2129,38 +2119,24 @@ void VatTuHieuChinh()
 						if(veKhungYesNo("    Ban co muon thay doi khong ?",0))
 						{
 							
-							VatTuDelete(t,mavt);
-							strcpy(data.MaVT,tam1.c_str());
-							strcpy(data.TenVT,tam2.c_str());
-							data.SoLuongTon = slt;
-							strcpy(data.DVT,tam3.c_str());
-							VatTuInsertNode(t,data);
-							system("cls");
-							gotoxy(36,2);
-							cout << "Ma Vat Tu: " << tam1;
-							veKhungKQTimKiem("Ma Vat Tu","Ten Vat Tu","So Luong Ton","DVT");
-							veKhungKhuyet1(18,7);
-							veKhungKhuyet2(18,7);
+							strcpy(q->Data.TenVT,tam2.c_str());
+							strcpy(q->Data.DVT,tam3.c_str());
+							ContentRemoveCT();
 							gotoxy(20,7);
-							cout << tam1;
+							cout << q->Data.MaVT;
 							gotoxy(35,7);
-							cout << tam2;
+							cout << q->Data.TenVT;
 							gotoxy(57,7);
 							cout << slt;
 							gotoxy(79,7);
-							cout << tam3;
+							cout << q->Data.DVT;
+							XoaKhungYN();
 							veKhungTB("        Da sua thanh cong");
 							system("cls");
 							return;
 						}
 						else
 						{
-							system("cls");
-							gotoxy(36,2);
-							cout << "Ma Vat Tu: " << q->Data.MaVT;
-							veKhungKQTimKiem("Ma Vat Tu","Ten Vat Tu","So Luong Ton","DVT");
-							veKhungKhuyet1(18,7);
-							veKhungKhuyet2(18,7);
 							gotoxy(20,7);
 							cout << q->Data.MaVT;
 							gotoxy(35,7);
@@ -2169,6 +2145,7 @@ void VatTuHieuChinh()
 							cout << q->Data.SoLuongTon;
 							gotoxy(79,7);
 							cout << q->Data.DVT;
+							XoaKhungYN();
 							veKhungTB("        Da huy tac vu sua");
 							system("cls");
 							return;
@@ -2178,44 +2155,29 @@ void VatTuHieuChinh()
 			}
 			else if(key ==8)
 			{
-				if(th==1 && tam1.size() > 0)
+				if(th ==1 && tam2.size() >0)
 				{
 					vtr--;
 					gotoxy(vtr,7);
 					cout << " ";
 					gotoxy(vtr,7);
-					tam1.erase(tam1.end()-1);
+					tam2.erase(tam2.end()-1);
+				
 				}
-				else if(th ==2 && tam2.size() >=0)
+				else if(th ==2 && tam3.size() >=0)
 				{
-					if(vtr==vtr-tam2.size())
+					if(vtr==vtr-tam3.size())
 					{
-						gotoxy(20+tam1.size(),7);
+						gotoxy(35+tam2.size(),7);
 						th=1;
 					}
 					else
 					{
 						vtr--;
-					gotoxy(vtr,7);
-					cout << " ";
-					gotoxy(vtr,7);
-					tam2.erase(tam2.end()-1);
-					}
-				}
-				else if(th ==3 && tam3.size() >=0)
-				{
-					if(vtr==vtr-tam3.size())
-					{
-						gotoxy(35+tam2.size(),7);
-						th=2;
-					}
-					else
-					{
-					vtr--;
-					gotoxy(vtr,7);
-					cout << " ";
-					gotoxy(vtr,7);
-					tam3.erase(tam3.end()-1);
+						gotoxy(vtr,7);
+						cout << " ";
+						gotoxy(vtr,7);
+						tam3.erase(tam3.end()-1);
 					}
 				}
 			}
@@ -2241,7 +2203,7 @@ void NhanVienwritetoFile()
 	ofs << dsnv.soLuongNV << endl;
 	for(int i =0; i < dsnv.soLuongNV;i++)
 	{
-		ofs << dsnv.nv[i].MaNV << '@' << dsnv.nv[i].Ho << '@' << dsnv.nv[i].Ten << '@' << dsnv.nv[i].Phai << endl;
+		ofs << dsnv.nv[i].MaNV << '@' << dsnv.nv[i].Ho << '@' << dsnv.nv[i].Ten << '@'  << dsnv.nv[i].Phai<< endl;
 	}
 	ofs.close();
 }
@@ -2250,6 +2212,7 @@ void NhanVienreadFromFile()
 	const char* path ="NHANVIEN.txt";
 	ifstream ifs(path,ios::in);
 	string MNV,Ho,Ten,Phai;
+	int x;
 	int n;
 	if(ifs.fail())
 	{
@@ -2264,7 +2227,6 @@ void NhanVienreadFromFile()
 		getline(ifs,Ten,'@');
 		getline(ifs,Phai);
 		NhanVienAddTail(MNV,Ho,Ten,Phai);
-		fflush(stdin);
 	}
 	ifs.close();
 }
@@ -2588,7 +2550,7 @@ void NhanVienNhap()
 	}
 }
 	
-void HoanDoiChar(char a[31],char b[31])
+void HoanDoiChar(char a[21],char b[21])
 {
 	char temp[31];
 	strcpy(temp,a);
@@ -2597,18 +2559,20 @@ void HoanDoiChar(char a[31],char b[31])
 }
 void NhanVienSort()
 {
-	string temp1,temp2,temph1,temph2;
-	for(int i =0;i<dsnv.soLuongNV-1;i++)
+	for(int i =0;i<dsnv.soLuongNV;i++)
 	{
-		for(int j =i+1;j<dsnv.soLuongNV;j++)
+		for(int j =dsnv.soLuongNV-1;j >i;j--)
 		{
-			temp1 =dsnv.nv[i].Ten;
-			temp2 = dsnv.nv[j].Ten;
-			temph1 =dsnv.nv[i].Ho;
-			temph2=dsnv.nv[j].Ho;
-			if(temp1 == temp2)
+			if(strcmp(dsnv.nv[i].Ten,dsnv.nv[j].Ten) ==1)
 			{
-				if(temph1 > temph2)
+				HoanDoiChar(dsnv.nv[i].MaNV,dsnv.nv[j].MaNV);
+				HoanDoiChar(dsnv.nv[i].Ho,dsnv.nv[j].Ho);
+				HoanDoiChar(dsnv.nv[i].Ten,dsnv.nv[j].Ten);
+				HoanDoiChar(dsnv.nv[i].Phai,dsnv.nv[j].Phai);
+			}
+			else if(strcmp(dsnv.nv[i].Ten,dsnv.nv[j].Ten)==0)
+			{
+				if(strcmp(dsnv.nv[i].Ho,dsnv.nv[j].Ho) == 1)
 				{
 					HoanDoiChar(dsnv.nv[i].MaNV,dsnv.nv[j].MaNV);
 					HoanDoiChar(dsnv.nv[i].Ho,dsnv.nv[j].Ho);
@@ -2616,13 +2580,7 @@ void NhanVienSort()
 					HoanDoiChar(dsnv.nv[i].Phai,dsnv.nv[j].Phai);
 				}
 			}
-			else if(temp1 > temp2)
-			{
-				HoanDoiChar(dsnv.nv[i].MaNV,dsnv.nv[j].MaNV);
-				HoanDoiChar(dsnv.nv[i].Ho,dsnv.nv[j].Ho);
-				HoanDoiChar(dsnv.nv[i].Ten,dsnv.nv[j].Ten);
-				HoanDoiChar(dsnv.nv[i].Phai,dsnv.nv[j].Phai);
-			}
+			
 		}
 	}
 }
@@ -2630,17 +2588,17 @@ void NhanVienXuat(NHANVIEN data,int stt)
 {
 	gotoxy(20,3+yMap +stt*2);
 	cout << data.MaNV;
-	gotoxy(36+((21-strlen(data.Ho))/2),3+yMap +stt*2);
+	gotoxy(39,3+yMap +stt*2);
 	cout << data.Ho;
-	gotoxy(57+((26-strlen(data.Ten))/2),3+yMap +stt*2);
+	gotoxy(63,3+yMap +stt*2);
 	cout << data.Ten;
-	gotoxy(82+((12-strlen(data.Phai))/2),3+yMap +stt*2);
+	gotoxy(87,3+yMap +stt*2);
 	cout << data.Phai;
 }
 void NhanVienXuatDS(int vitri=0)
 {
 	Nocursortype();
-	NhanVienSort();
+	
 	int k=0;
 	for(int i =vitri;i< dsnv.soLuongNV;i++)
 	{
@@ -2661,7 +2619,7 @@ void NhanVienQuanLyXuat()
 		return;
 	}
 	system("cls");
-	
+	NhanVienSort();
 	string arr[]={"Ma NV","Ho","Ten","Phai"};
 	gotoxy(45,2);
 	textcolor(setMauTiTle);
@@ -3097,6 +3055,7 @@ void NhanVienHieuChinh()
 							cout << dsnv.nv[vtr].Ten;
 							gotoxy(79,7);
 							cout << dsnv.nv[vtr].Phai;
+							XoaKhungYN();
 							veKhungTB("        Da sua thanh cong");
 							system("cls");
 							return;
@@ -3117,6 +3076,7 @@ void NhanVienHieuChinh()
 							cout << dsnv.nv[vtr].Ten;
 							gotoxy(79,7);
 							cout << dsnv.nv[vtr].Phai;
+							XoaKhungYN();
 							veKhungTB("        Da huy tac vu sua");
 							system("cls");
 							return;
@@ -3207,7 +3167,6 @@ void NhanVienXoa()
 			{
 				if(veKhungYesNo("     Ban co muon thoat khong?",0))
 				{
-					NhanVienwritetoFile();
 					system("cls");
 					return;
 				}
@@ -3285,8 +3244,9 @@ void NhanVienXoa()
 					if(veKhungYesNo("     Ban co muon xoa khong?",0))
 					{
 						NhanVienDel(vtr);
-						system("cls");
-						veKhungTB(" Xoa thanh cong "+manv+"");
+						NhanVienwritetoFile();
+						XoaKhungYN();
+						veKhungTB("   Xoa thanh cong "+manv+"");
 						system("cls");
 						return;
 					}
@@ -3303,6 +3263,7 @@ void NhanVienXoa()
 						cout << dsnv.nv[vtr].Ten;
 						gotoxy(79+((6-strlen(dsnv.nv[vtr].Phai))/2),7);
 						cout << dsnv.nv[vtr].Phai;
+						XoaKhungYN();
 						veKhungTB("       Da huy xoa "+manv+"");
 						system("cls");
 						return;
@@ -3576,7 +3537,9 @@ void CT_HoaDOnNhapNhap(string MSHD)
 						veKhungTongGiaTien(12+dong*2);
 						textcolor(setMauWarning);
 						gotoxy(55,13+dong*2);
-						cout << tong << "  VND";
+						cout << to_Currency(tong);
+						gotoxy(80,13+dong*2);
+						cout << "VND";
 						textcolor(7);
 						veKhungCTKhuyet1(10,8+dong*2);
 						veKhungCTKhuyet2(10,8+dong*2);
@@ -3606,7 +3569,9 @@ void CT_HoaDOnNhapNhap(string MSHD)
 						veKhungTongGiaTien(12+dong*2);
 						textcolor(setMauWarning);
 						gotoxy(55,13+dong*2);
-						cout << tong << "  VND";
+						cout << to_Currency(tong);
+						gotoxy(80,13+dong*2);
+						cout << "VND";
 						textcolor(7);
 						veKhungCTKhuyet1(10,8+dong*2);
 						veKhungCTKhuyet2(10,8+dong*2);
@@ -3891,7 +3856,9 @@ void CT_HoaDonXuatNhap(string MSHD)
 						veKhungTongGiaTien(12+dong*2);
 						textcolor(setMauWarning);
 						gotoxy(55,13+dong*2);
-						cout << tong << "  VND";
+						cout << tong;
+						gotoxy(80,13+dong*2);
+						cout << "VND";
 						textcolor(7);
 						veKhungCTKhuyet1(10,8+dong*2);
 						veKhungCTKhuyet2(10,8+dong*2);
@@ -3959,8 +3926,10 @@ void CT_HoaDonXuat(CT_HOADON data,int stt)
 	cout << data.MaVT;
 	gotoxy(36+((21-to_String(data.soluong).size())/2),3+yMap +stt*2);
 	cout << data.soluong;
-	gotoxy(57+((26-to_String(data.dongia).size())/2),3+yMap +stt*2);
-	cout << data.dongia;
+	gotoxy(60,3+yMap +stt*2);
+	cout << to_Currency(data.dongia);
+	gotoxy(77,3+yMap + stt*2);
+	cout << "VND";
 	gotoxy(74+((26-to_String(data.VAT).size())/2),3+yMap +stt*2);
 	cout << data.VAT;
 }
@@ -4503,7 +4472,7 @@ void HoaDonNhap(int tinhieu)
 							gotoxy(vitri,4);
 							MaNV.erase(MaNV.end()-1);
 						}
-						else if(flag == 2&&MSHD.size()>0)
+						else if(flag == 2&&MSHD.size()>=0)
 						{
 							if(MSHD.size() == 0)
 							{
@@ -4639,6 +4608,10 @@ void HoaDonXuatThongTin()
 					else
 					{
 						q= HoaDonSearch(SoHD);
+						textcolor(setMauTiTle);
+						gotoxy(46,2);
+						cout << "THONG TIN HOA DON";
+						textcolor(7);
 						gotoxy(36,3);
 						cout <<"                                                          ";
 						gotoxy(20,3);
@@ -4662,9 +4635,10 @@ void HoaDonXuatThongTin()
 						}
 						NODECT_HOADON *p;
 						string arr[] ={"Ma Vat Tu","So Luong","Don Gia","%VAT"};
-						veKhungChiTiet(arr,2);
+						veKhungChiTiet(arr,1);
 						for(p = q->data.fisrtCT;p!=NULL;p=p->pNext)
 						{
+							Nocursortype();
 							CT_HoaDonXuat(p->Data,stt);
 							stt++;
 						}
@@ -4812,7 +4786,7 @@ void TKHDXuat(THONGKE tk, int stt)
 	gotoxy(arrToaDoBangThongKeHD[3]+2,y);
 	cout << tk.HoTenNV;
 	gotoxy(arrToaDoBangThongKeHD[4]+2,y);
-	cout << tk.donGia;
+	cout << to_Currency(tk.donGia);
 	gotoxy(arrToaDoBangThongKeHD[5]-4,y);
 	cout << "VND";
 }
@@ -5459,7 +5433,7 @@ void DS10VTDoanhThu(Date &first, Date &final, int DT[][2],string MVT[],int &nArr
 	string mvt[dem];
 	int n;
 	VatTuLNR(t,mvt,n);
-	for(int a = 0; a < dem; a++)
+	for(int a = 0; a < n; a++)
 	{
 		dt[a][0] = 0;
 		dt[a][1] = 0;
@@ -5475,11 +5449,11 @@ void DS10VTDoanhThu(Date &first, Date &final, int DT[][2],string MVT[],int &nArr
 			{
 				for(NODECT_HOADON* q =p->data.fisrtCT; q!=NULL; q=q->pNext)
 				{
-					for(int j = 0; j < dem; j++)
+					for(int j = 0; j < n; j++)
 					{
 						if( strcmp(q->Data.MaVT,mvt[j].c_str()) == 0)
 						{
-							dt[j][0] += (q->Data.dongia*q->Data.soluong+q->Data.dongia*q->Data.soluong*(q->Data.VAT/100));
+							dt[j][0] += q->Data.dongia*q->Data.soluong+q->Data.VAT/100*q->Data.dongia;
 							dt[j][1] += q->Data.soluong;
 						}
 					}
@@ -5522,6 +5496,7 @@ void DS10VTSort(int DT[][2], string MVT[], int &nArr)
 }
 void DS10VTXuat(int DT[][2], string MVT[],int nArr)
 {
+	Nocursortype();
 	int stt =0;
 	int y;
 	DS10VTSort(DT,MVT,nArr);
@@ -5539,7 +5514,7 @@ void DS10VTXuat(int DT[][2], string MVT[],int nArr)
 		gotoxy(35,y);
 		cout << VatTuSearch(t,MVT[i])->Data.TenVT;
 		gotoxy(57,y);
-		cout << DT[i][0];
+		cout << to_Currency(DT[i][0]);
 		gotoxy(72,y);
 		cout << "VND";
 		gotoxy(79,y);
@@ -5583,7 +5558,7 @@ void DS10VTQuanLyXuat()
 		system("cls");
 		return;
 	}
-	veKhungKQTimKiem("Ma Vat Tu","Ten Vat Tu","So luong ton","DVT");
+	veKhungKQTimKiem("Ma Vat Tu","Ten Vat Tu","Doanh Thu","   SL");
 	veKhungKhuyet1(18,7);
 	veKhungKhuyet2(18,7);
 	DS10VTXuat(DT,MVT,nArr);
